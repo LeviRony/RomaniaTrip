@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject planner, navigation, USD, committed total, resilient FX and expense fix
+      - name: Inject planner, navigation, USD, committed total, resilient FX, expenses and car editor
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -53,6 +53,7 @@ jobs:
 
           planner = '<script src="./planner.js?v=20260822-6"></script>'
           expenses = '<script src="./expenses-fix.js?v=20260822-1"></script>'
+          car_editor = '<script src="./car-editor.js?v=20260822-1"></script>'
           navfix = '''<script>
           document.addEventListener('click', function(e){
             const b=e.target.closest('.nav button[data-page]'); if(!b) return;
@@ -74,7 +75,8 @@ jobs:
           </script>'''
           s = re.sub(r'<script src="\./planner\.js\?v=[^"]+"></script>', '', s)
           s = re.sub(r'<script src="\./expenses-fix\.js\?v=[^"]+"></script>', '', s)
-          s = s.replace('</body>', planner + expenses + navfix + '</body>')
+          s = re.sub(r'<script src="\./car-editor\.js\?v=[^"]+"></script>', '', s)
+          s = s.replace('</body>', planner + expenses + car_editor + navfix + '</body>')
           p.write_text(s, encoding='utf-8')
           PY
       - uses: actions/configure-pages@v5
