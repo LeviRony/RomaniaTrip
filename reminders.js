@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const items=[
- {key:'lukoil',match:'Lukoil',title:'לא לתדלק בתחנת Lukoil',desc:'תזכורת לטיול ברומניה: לא לתדלק בתחנת Lukoil.',start:'20260923T184500Z',end:'20260923T190000Z'},
+ {key:'fuel',match:'לתדלק בתחנה גדולה',title:'תדלוק ברומניה - תחנה מסודרת וקבלה',desc:'לתדלק בתחנה גדולה ומסודרת ולשמור את קבלת התדלוק.',start:'20260923T184500Z',end:'20260923T190000Z'},
  {key:'parking',match:'Parking Bucharest',title:'להפעיל Parking Bucharest',desc:'בבוקרשט: להשתמש באפליקציית Parking Bucharest לחניה.',start:'20260927T153000Z',end:'20260927T154500Z'},
  {key:'dn7c',match:'Transfăgărășan',title:'לבדוק DN7C ומזג אוויר',desc:'לבדוק פתיחת כביש DN7C ומזג אוויר לפני הנסיעה ב-Transfăgărășan.',start:'20260925T060000Z',end:'20260925T061500Z',second:{title:'בדיקה נוספת: DN7C ומזג אוויר',desc:'בדיקה נוספת 24 שעות לפני: פתיחת DN7C ומזג אוויר.',start:'20260926T060000Z',end:'20260926T061500Z'}},
  {key:'therme',match:'Therme',title:'Therme - לבדוק כללי גובה וילדים',desc:'לפני Therme: לבדוק כללי גובה, גיל ואזורי ילדים.',start:'20260929T070000Z',end:'20260929T071500Z'},
