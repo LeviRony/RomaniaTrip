@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject planner, navigation fix and USD support
+      - name: Inject planner, navigation fix, USD support and committed total
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -35,7 +35,14 @@ jobs:
           s = s.replace("summaryFx={EURILS:eurIls,RONILS:eurIls/eurRon};", "const eurUsd=Number(j.rates.USD);summaryFx={EURILS:eurIls,RONILS:eurIls/eurRon,USDILS:eurIls/eurUsd};")
           s = s.replace("`€1 = ₪${summaryFx.EURILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`", "`€1 = ₪${summaryFx.EURILS.toFixed(3)} · $1 = ₪${summaryFx.USDILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`")
 
-          planner = '<script src="./planner.js?v=20260822-3"></script>'
+          # The headline total means money already paid or contractually committed now.
+          s = s.replace('סה״כ משוער', 'סה״כ:')
+          s = s.replace('סה"כ משוער', 'סה״כ:')
+          s = s.replace('summaryMoney(swiss+novo+car+park+fuel+manual)', 'summaryMoney(swiss+novo+car+manual)')
+          s = s.replace('הסה״כ כולל את המלונות, הרכב, הדלק הצפוי, חניית Swissôtel והוצאות ידניות.', 'הסה״כ כולל רק סכומים שכבר שולמו או שהתחייבת לשלם נכון לעכשיו: מלונות, השכרת רכב והוצאות ידניות. דלק, חניה ואגרות עתידיות אינן נכללות עד לתשלום או להתחייבות בפועל.')
+          s = s.replace('הסה"כ כולל את המלונות, הרכב, הדלק הצפוי, חניית Swissôtel והוצאות ידניות.', 'הסה״כ כולל רק סכומים שכבר שולמו או שהתחייבת לשלם נכון לעכשיו: מלונות, השכרת רכב והוצאות ידניות. דלק, חניה ואגרות עתידיות אינן נכללות עד לתשלום או להתחייבות בפועל.')
+
+          planner = '<script src="./planner.js?v=20260822-4"></script>'
           navfix = '''<script>
           document.addEventListener('click', function(e){
             const b=e.target.closest('.nav button[data-page]');
