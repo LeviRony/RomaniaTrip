@@ -18,13 +18,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject planner and navigation fix
+      - name: Inject planner, navigation fix and USD support
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          planner = '<script src="./planner.js?v=20260822-2"></script>'
+
+          # Add USD to manual expense currency selector.
+          s = s.replace('<option value="RON">RON</option><option value="EUR">EUR</option><option value="ILS">ILS</option>', '<option value="RON">RON</option><option value="EUR">EUR</option><option value="USD">USD ($)</option><option value="ILS">ILS</option>')
+
+          # Add USD conversion support to the summary.
+          s = s.replace("if(currency==='RON')return amount*summaryFx.RONILS;return 0", "if(currency==='RON')return amount*summaryFx.RONILS;if(currency==='USD')return amount*summaryFx.USDILS;return 0")
+          s = s.replace("fetch('https://api.frankfurter.app/latest?from=EUR&to=ILS,RON'", "fetch('https://api.frankfurter.app/latest?from=EUR&to=ILS,RON,USD'")
+          s = s.replace("summaryFx={EURILS:eurIls,RONILS:eurIls/eurRon};", "const eurUsd=Number(j.rates.USD);summaryFx={EURILS:eurIls,RONILS:eurIls/eurRon,USDILS:eurIls/eurUsd};")
+          s = s.replace("`€1 = ₪${summaryFx.EURILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`", "`€1 = ₪${summaryFx.EURILS.toFixed(3)} · $1 = ₪${summaryFx.USDILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`")
+
+          planner = '<script src="./planner.js?v=20260822-3"></script>'
           navfix = '''<script>
           document.addEventListener('click', function(e){
             const b=e.target.closest('.nav button[data-page]');
@@ -45,7 +56,6 @@ jobs:
             },0);
           },true);
           </script>'''
-          import re
           s = re.sub(r'<script src="\./planner\.js\?v=[^"]+"></script>', '', s)
           s = s.replace('</body>', planner + navfix + '</body>')
           p.write_text(s, encoding='utf-8')
