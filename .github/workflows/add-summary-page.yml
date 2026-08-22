@@ -1,0 +1,92 @@
+name: Add Summary Page
+on:
+  push:
+    paths:
+      - '.github/workflows/add-summary-page.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch summary page
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          if 'data-page="summary"' not in s:
+              s=s.replace('<button data-page="calculator">🧮 מחשבון</button>', '<button data-page="calculator">🧮 מחשבון</button><button data-page="summary">💰 סיכומים</button>')
+
+          css='''
+          .summary-list{display:grid;gap:10px}.summary-row{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:10px;align-items:center;padding:12px;background:#f8fafb;border-radius:12px}.summary-row.total{background:var(--p);color:#fff;font-size:1.15rem}.summary-row.total b{color:#fff}.summary-ils{font-weight:900;color:var(--p);direction:ltr;unicode-bidi:isolate}.summary-row.total .summary-ils{color:#fff}.expense-form{display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:9px;align-items:end}.expense-form input,.expense-form select{font-size:16px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}.expense-table{margin-top:12px;display:grid;gap:8px}.expense-item{display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:8px;align-items:center;padding:10px;background:#f8fafb;border-radius:10px}.danger-btn{border:0;background:#b42318;color:white;border-radius:9px;padding:8px 10px;cursor:pointer}.summary-note{margin-top:12px;padding:11px;background:#eef6f8;border-radius:10px}@media(max-width:850px){.summary-row{grid-template-columns:1fr}.expense-form,.expense-item{grid-template-columns:1fr}.expense-form button,.expense-item button{width:100%}}
+          '''
+          if '.summary-list{' not in s:
+              s=s.replace('</style>', css+'</style>')
+
+          summary='''
+          <section id="page-summary" class="page">
+            <h1>💰 סיכום עלויות הטיול</h1>
+            <div class="card">
+              <div class="summary-list" id="summaryList">
+                <div class="summary-row"><div><b>🏨 Swissôtel Poiana Brașov</b><div class="muted">4 לילות</div></div><div class="ltr">€1,268.70</div><div class="summary-ils" id="sumSwiss">—</div></div>
+                <div class="summary-row"><div><b>🏨 Novotel Bucharest City Centre</b><div class="muted">3 לילות</div></div><div class="ltr">4,498.01 RON</div><div class="summary-ils" id="sumNovotel">—</div></div>
+                <div class="summary-row"><div><b>🚙 Klass Wagen</b><div class="muted">Tiguan Automatic או דומה + Total Cover</div></div><div class="ltr">€413.83</div><div class="summary-ils" id="sumCar">—</div></div>
+                <div class="summary-row"><div><b>⛽ דלק צפוי</b><div class="muted" id="sumFuelDetails">לפי הק״מ, הצריכה ומחיר הדלק בעמוד הרכב</div></div><div class="ltr" id="sumFuelRon">—</div><div class="summary-ils" id="sumFuel">—</div></div>
+                <div class="summary-row"><div><b>🅿️ חניה Swissôtel</b><div class="muted">€17 × 4 לילות · עלות צפויה אם משתמשים בחניה</div></div><div class="ltr">€68.00</div><div class="summary-ils" id="sumParking">—</div></div>
+                <div class="summary-row"><div><b>🛣️ Rovinieta</b><div class="muted">כלולה בהשכרת הרכב</div></div><div>0</div><div class="summary-ils">₪0</div></div>
+                <div id="manualSummaryRows"></div>
+                <div class="summary-row total"><div><b>סה״כ משוער</b><div style="font-size:.85rem;opacity:.85">כולל ההוצאות הידניות שהוספת</div></div><div></div><div class="summary-ils" id="summaryGrandTotal">—</div></div>
+              </div>
+              <div class="summary-note"><b>שערי המרה:</b> <span id="summaryRates">טוען…</span><br><span class="muted" id="summaryRateStatus">המחירים מומרים לשקלים. במקרה שאין אינטרנט יוצגו השערים האחרונים שנשמרו.</span></div>
+            </div>
+
+            <h2 class="section-title">➕ הוצאות נוספות</h2>
+            <div class="card">
+              <div class="expense-form">
+                <label class="field"><span>מחיר</span><input id="expenseAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="100"></label>
+                <label class="field"><span>מטבע</span><select id="expenseCurrency"><option value="RON">RON</option><option value="EUR">EUR</option><option value="ILS">ILS</option></select></label>
+                <label class="field"><span>הסבר</span><input id="expenseDescription" type="text" placeholder="למשל: Therme / מסעדה / אטרקציה"></label>
+                <button class="btn" type="button" id="addExpenseBtn">הוסף</button>
+              </div>
+              <div class="expense-table" id="expenseTable"></div>
+              <p class="muted">הוצאות נוספות נשמרות במכשיר הזה ונכללות אוטומטית בסה״כ.</p>
+            </div>
+          </section>
+          '''
+          if 'id="page-summary"' not in s:
+              s=s.replace('</main>', summary+'</main>')
+
+          js=r'''
+          const SUMMARY_BASE={swissEUR:1268.70,novotelRON:4498.01,carEUR:413.83,parkingEUR:68};
+          let summaryFx={EURILS:0,RONILS:0};
+          const summaryMoney=n=>'₪'+Math.round(n).toLocaleString('he-IL');
+          function getManualExpenses(){try{return JSON.parse(localStorage.getItem('romania-manual-expenses')||'[]')}catch(e){return []}}
+          function saveManualExpenses(v){localStorage.setItem('romania-manual-expenses',JSON.stringify(v))}
+          function toIls(amount,currency){amount=Number(amount)||0;if(currency==='ILS')return amount;if(currency==='EUR')return amount*summaryFx.EURILS;if(currency==='RON')return amount*summaryFx.RONILS;return 0}
+          function expectedFuelRon(){const km=Number(localStorage.getItem('trip-total-km')||0),price=Number(localStorage.getItem('fuel-price')||document.getElementById('fuelPrice')?.value||0),cons=Number(localStorage.getItem('fuel-consumption')||document.getElementById('fuelConsumption')?.value||8);return km>0&&price>0&&cons>0?km*cons/100*price:0}
+          function renderExpenses(){const list=getManualExpenses(),table=document.getElementById('expenseTable'),rows=document.getElementById('manualSummaryRows');if(!table||!rows)return;table.innerHTML=list.length?'':'<div class="muted">עדיין לא נוספו הוצאות ידניות.</div>';rows.innerHTML='';list.forEach((x,i)=>{const ils=toIls(x.amount,x.currency);table.insertAdjacentHTML('beforeend',`<div class="expense-item"><b class="ltr">${Number(x.amount).toLocaleString('he-IL',{maximumFractionDigits:2})} ${x.currency}</b><span class="summary-ils">${summaryMoney(ils)}</span><span>${x.description||'הוצאה נוספת'}</span><button class="danger-btn" type="button" data-expense-delete="${i}">מחק</button></div>`);rows.insertAdjacentHTML('beforeend',`<div class="summary-row"><div><b>➕ ${x.description||'הוצאה נוספת'}</b></div><div class="ltr">${Number(x.amount).toLocaleString('he-IL',{maximumFractionDigits:2})} ${x.currency}</div><div class="summary-ils">${summaryMoney(ils)}</div></div>`)});table.querySelectorAll('[data-expense-delete]').forEach(b=>b.onclick=()=>{const a=getManualExpenses();a.splice(Number(b.dataset.expenseDelete),1);saveManualExpenses(a);renderSummary()})}
+          function renderSummary(){if(!summaryFx.EURILS||!summaryFx.RONILS)return;const fuelRon=expectedFuelRon(),manual=getManualExpenses().reduce((t,x)=>t+toIls(x.amount,x.currency),0);const swiss=SUMMARY_BASE.swissEUR*summaryFx.EURILS,novo=SUMMARY_BASE.novotelRON*summaryFx.RONILS,car=SUMMARY_BASE.carEUR*summaryFx.EURILS,park=SUMMARY_BASE.parkingEUR*summaryFx.EURILS,fuel=fuelRon*summaryFx.RONILS;document.getElementById('sumSwiss').textContent=summaryMoney(swiss);document.getElementById('sumNovotel').textContent=summaryMoney(novo);document.getElementById('sumCar').textContent=summaryMoney(car);document.getElementById('sumParking').textContent=summaryMoney(park);document.getElementById('sumFuelRon').textContent=fuelRon?fuelRon.toFixed(0)+' RON':'—';document.getElementById('sumFuel').textContent=fuelRon?summaryMoney(fuel):'—';const km=Number(localStorage.getItem('trip-total-km')||0),cons=Number(localStorage.getItem('fuel-consumption')||8);document.getElementById('sumFuelDetails').textContent=km?`${Math.round(km)} ק״מ · ${cons} ל׳/100 ק״מ`:'מחכה לחישוב סה״כ הק״מ בעמוד הרכב';document.getElementById('summaryGrandTotal').textContent=summaryMoney(swiss+novo+car+park+fuel+manual);document.getElementById('summaryRates').textContent=`€1 = ₪${summaryFx.EURILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`;renderExpenses()}
+          async function loadSummaryFx(){const cached=localStorage.getItem('romania-summary-fx');if(cached){try{const c=JSON.parse(cached);summaryFx=c.rates;renderSummary();document.getElementById('summaryRateStatus').textContent='מציג שער שמור ומעדכן…'}catch(e){}}try{const r=await fetch('https://api.frankfurter.app/latest?from=EUR&to=ILS,RON',{cache:'no-store'});if(!r.ok)throw new Error('fx');const j=await r.json(),eurIls=Number(j.rates.ILS),eurRon=Number(j.rates.RON);summaryFx={EURILS:eurIls,RONILS:eurIls/eurRon};localStorage.setItem('romania-summary-fx',JSON.stringify({rates:summaryFx,time:new Date().toISOString()}));renderSummary();document.getElementById('summaryRateStatus').textContent='🟢 שערי ההמרה עודכנו אונליין'}catch(e){document.getElementById('summaryRateStatus').textContent=summaryFx.EURILS?'🟡 לא ניתן לעדכן כרגע · משתמש בשער האחרון שנשמר':'🔴 אין כרגע שער המרה זמין'}}
+          document.getElementById('addExpenseBtn')?.addEventListener('click',()=>{const amount=Number(document.getElementById('expenseAmount').value),currency=document.getElementById('expenseCurrency').value,description=document.getElementById('expenseDescription').value.trim();if(!(amount>0)){alert('יש להזין מחיר');return}const a=getManualExpenses();a.push({amount,currency,description});saveManualExpenses(a);document.getElementById('expenseAmount').value='';document.getElementById('expenseDescription').value='';renderSummary()});
+          document.querySelector('[data-page="summary"]')?.addEventListener('click',()=>setTimeout(renderSummary,0));
+          ['fuelPrice','fuelConsumption'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>setTimeout(renderSummary,0)));
+          loadSummaryFx();
+          '''
+          if 'SUMMARY_BASE' not in s:
+              s=s.replace('</script></body></html>', js+'</script></body></html>')
+
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Add trip cost summary and manual expenses"
+            git push
+          fi
