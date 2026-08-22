@@ -18,15 +18,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject planner script
+      - name: Inject planner and navigation fix
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          tag = '<script src="./planner.js?v=20260822-1"></script>'
-          if 'planner.js' not in s:
-              s = s.replace('</body>', tag + '</body>')
+          planner = '<script src="./planner.js?v=20260822-2"></script>'
+          navfix = '''<script>
+          document.addEventListener('click', function(e){
+            const b=e.target.closest('.nav button[data-page]');
+            if(!b) return;
+            const page=b.dataset.page;
+            setTimeout(function(){
+              document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
+              document.querySelectorAll('.nav button[data-page]').forEach(function(x){x.classList.toggle('on',x===b)});
+              const target=document.getElementById('page-'+page);
+              if(target) target.classList.add('on');
+              if(page==='home' && typeof renderHome==='function') try{renderHome()}catch(_e){}
+              if(page==='trip'){
+                try{ if(typeof installRouteEditor==='function') installRouteEditor(); }catch(_e){}
+                try{ if(typeof renderRouteEditor==='function') renderRouteEditor(); }catch(_e){}
+                try{ if(window.map && typeof map.invalidateSize==='function') setTimeout(function(){map.invalidateSize()},80); }catch(_e){}
+              }
+              window.scrollTo({top:0,behavior:'smooth'});
+            },0);
+          },true);
+          </script>'''
+          import re
+          s = re.sub(r'<script src="\./planner\.js\?v=[^"]+"></script>', '', s)
+          s = s.replace('</body>', planner + navfix + '</body>')
           p.write_text(s, encoding='utf-8')
           PY
       - uses: actions/configure-pages@v5
