@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject planner, navigation, USD, committed total and resilient FX
+      - name: Inject planner, navigation, USD, committed total, resilient FX and expense fix
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -32,7 +32,6 @@ jobs:
           s = s.replace('summaryMoney(swiss+novo+car+park+fuel+manual)', 'summaryMoney(swiss+novo+car+manual)')
           s = s.replace('הסה״כ כולל את המלונות, הרכב, הדלק הצפוי, חניית Swissôtel והוצאות ידניות.', 'הסה״כ כולל רק סכומים שכבר שולמו או שהתחייבת לשלם נכון לעכשיו: מלונות, השכרת רכב והוצאות ידניות. דלק, חניה ואגרות עתידיות אינן נכללות עד לתשלום או להתחייבות בפועל.')
 
-          # Replace summary FX loader with a provider that supports browser CORS and two fallbacks.
           start = s.find('async function loadSummaryFx(){')
           end_marker = "document.getElementById('addExpenseBtn')"
           end = s.find(end_marker, start)
@@ -41,32 +40,19 @@ jobs:
   const status=document.getElementById('summaryRateStatus');
   const cached=localStorage.getItem('romania-summary-fx');
   if(cached){try{const c=JSON.parse(cached);if(c.rates){summaryFx=c.rates;renderSummary();if(status)status.textContent='🟡 מציג שער אחרון שנשמר ומעדכן…'}}catch(e){}}
-  async function tryFrankfurter(){
-    const r=await fetch('https://api.frankfurter.dev/v1/latest?base=EUR&symbols=ILS,RON,USD',{cache:'no-store'});if(!r.ok)throw new Error('frankfurter');
-    const j=await r.json(),eurIls=Number(j.rates.ILS),eurRon=Number(j.rates.RON),eurUsd=Number(j.rates.USD);
-    if(!(eurIls>0&&eurRon>0&&eurUsd>0))throw new Error('bad rates');
-    return {EURILS:eurIls,RONILS:eurIls/eurRon,USDILS:eurIls/eurUsd};
-  }
-  async function tryOpenErApi(){
-    const r=await fetch('https://open.er-api.com/v6/latest/EUR',{cache:'no-store'});if(!r.ok)throw new Error('er-api');
-    const j=await r.json(),eurIls=Number(j.rates&&j.rates.ILS),eurRon=Number(j.rates&&j.rates.RON),eurUsd=Number(j.rates&&j.rates.USD);
-    if(!(eurIls>0&&eurRon>0&&eurUsd>0))throw new Error('bad rates');
-    return {EURILS:eurIls,RONILS:eurIls/eurRon,USDILS:eurIls/eurUsd};
-  }
-  try{
-    try{summaryFx=await tryFrankfurter()}catch(e){summaryFx=await tryOpenErApi()}
-    localStorage.setItem('romania-summary-fx',JSON.stringify({rates:summaryFx,time:new Date().toISOString()}));
-    renderSummary();if(status)status.textContent='🟢 שערי ההמרה עודכנו אונליין';
-  }catch(e){if(status)status.textContent=summaryFx.EURILS?'🟡 אין עדכון כרגע · משתמש בשער האחרון שנשמר':'🔴 לא ניתן לטעון שערי המרה כרגע'}
+  async function tryFrankfurter(){const r=await fetch('https://api.frankfurter.dev/v1/latest?base=EUR&symbols=ILS,RON,USD',{cache:'no-store'});if(!r.ok)throw new Error('frankfurter');const j=await r.json(),eurIls=Number(j.rates.ILS),eurRon=Number(j.rates.RON),eurUsd=Number(j.rates.USD);if(!(eurIls>0&&eurRon>0&&eurUsd>0))throw new Error('bad rates');return {EURILS:eurIls,RONILS:eurIls/eurRon,USDILS:eurIls/eurUsd};}
+  async function tryOpenErApi(){const r=await fetch('https://open.er-api.com/v6/latest/EUR',{cache:'no-store'});if(!r.ok)throw new Error('er-api');const j=await r.json(),eurIls=Number(j.rates&&j.rates.ILS),eurRon=Number(j.rates&&j.rates.RON),eurUsd=Number(j.rates&&j.rates.USD);if(!(eurIls>0&&eurRon>0&&eurUsd>0))throw new Error('bad rates');return {EURILS:eurIls,RONILS:eurIls/eurRon,USDILS:eurIls/eurUsd};}
+  try{try{summaryFx=await tryFrankfurter()}catch(e){summaryFx=await tryOpenErApi()}localStorage.setItem('romania-summary-fx',JSON.stringify({rates:summaryFx,time:new Date().toISOString()}));renderSummary();if(window.renderManualExpenses)window.renderManualExpenses();if(status)status.textContent='🟢 שערי ההמרה עודכנו אונליין';}
+  catch(e){if(window.renderManualExpenses)window.renderManualExpenses();if(status)status.textContent=summaryFx.EURILS?'🟡 אין עדכון כרגע · משתמש בשער האחרון שנשמר':'🔴 לא ניתן לטעון שערי המרה כרגע'}
 }
 '''
               s = s[:start] + new_fx + s[end:]
 
-          # Ensure the summary rate text handles USD even when an old cached object lacks it.
           s = s.replace("document.getElementById('summaryRates').textContent=`€1 = ₪${summaryFx.EURILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`;", "document.getElementById('summaryRates').textContent=`€1 = ₪${summaryFx.EURILS.toFixed(3)} · ${summaryFx.USDILS?'$1 = ₪'+summaryFx.USDILS.toFixed(3)+' · ':''}1 RON = ₪${summaryFx.RONILS.toFixed(3)}`;")
           s = s.replace("document.getElementById('summaryRates').textContent=`€1 = ₪${summaryFx.EURILS.toFixed(3)} · $1 = ₪${summaryFx.USDILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`;", "document.getElementById('summaryRates').textContent=`€1 = ₪${summaryFx.EURILS.toFixed(3)} · ${summaryFx.USDILS?'$1 = ₪'+summaryFx.USDILS.toFixed(3)+' · ':''}1 RON = ₪${summaryFx.RONILS.toFixed(3)}`;")
 
-          planner = '<script src="./planner.js?v=20260822-5"></script>'
+          planner = '<script src="./planner.js?v=20260822-6"></script>'
+          expenses = '<script src="./expenses-fix.js?v=20260822-1"></script>'
           navfix = '''<script>
           document.addEventListener('click', function(e){
             const b=e.target.closest('.nav button[data-page]'); if(!b) return;
@@ -76,6 +62,7 @@ jobs:
               document.querySelectorAll('.nav button[data-page]').forEach(function(x){x.classList.toggle('on',x===b)});
               const target=document.getElementById('page-'+page); if(target) target.classList.add('on');
               if(page==='home' && typeof renderHome==='function') try{renderHome()}catch(_e){}
+              if(page==='summary' && window.renderManualExpenses) try{window.renderManualExpenses()}catch(_e){}
               if(page==='trip'){
                 try{if(typeof installRouteEditor==='function')installRouteEditor()}catch(_e){}
                 try{if(typeof renderRouteEditor==='function')renderRouteEditor()}catch(_e){}
@@ -86,7 +73,8 @@ jobs:
           },true);
           </script>'''
           s = re.sub(r'<script src="\./planner\.js\?v=[^"]+"></script>', '', s)
-          s = s.replace('</body>', planner + navfix + '</body>')
+          s = re.sub(r'<script src="\./expenses-fix\.js\?v=[^"]+"></script>', '', s)
+          s = s.replace('</body>', planner + expenses + navfix + '</body>')
           p.write_text(s, encoding='utf-8')
           PY
       - uses: actions/configure-pages@v5
