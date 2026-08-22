@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject planner, navigation fix, USD support and committed total
+      - name: Inject planner, navigation, USD, committed total and resilient FX
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -26,38 +26,60 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          # Add USD to manual expense currency selector.
           s = s.replace('<option value="RON">RON</option><option value="EUR">EUR</option><option value="ILS">ILS</option>', '<option value="RON">RON</option><option value="EUR">EUR</option><option value="USD">USD ($)</option><option value="ILS">ILS</option>')
-
-          # Add USD conversion support to the summary.
           s = s.replace("if(currency==='RON')return amount*summaryFx.RONILS;return 0", "if(currency==='RON')return amount*summaryFx.RONILS;if(currency==='USD')return amount*summaryFx.USDILS;return 0")
-          s = s.replace("fetch('https://api.frankfurter.app/latest?from=EUR&to=ILS,RON'", "fetch('https://api.frankfurter.app/latest?from=EUR&to=ILS,RON,USD'")
-          s = s.replace("summaryFx={EURILS:eurIls,RONILS:eurIls/eurRon};", "const eurUsd=Number(j.rates.USD);summaryFx={EURILS:eurIls,RONILS:eurIls/eurRon,USDILS:eurIls/eurUsd};")
-          s = s.replace("`€1 = ₪${summaryFx.EURILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`", "`€1 = ₪${summaryFx.EURILS.toFixed(3)} · $1 = ₪${summaryFx.USDILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`")
-
-          # The headline total means money already paid or contractually committed now.
-          s = s.replace('סה״כ משוער', 'סה״כ:')
-          s = s.replace('סה"כ משוער', 'סה״כ:')
+          s = s.replace('סה״כ משוער', 'סה״כ:').replace('סה"כ משוער', 'סה״כ:')
           s = s.replace('summaryMoney(swiss+novo+car+park+fuel+manual)', 'summaryMoney(swiss+novo+car+manual)')
           s = s.replace('הסה״כ כולל את המלונות, הרכב, הדלק הצפוי, חניית Swissôtel והוצאות ידניות.', 'הסה״כ כולל רק סכומים שכבר שולמו או שהתחייבת לשלם נכון לעכשיו: מלונות, השכרת רכב והוצאות ידניות. דלק, חניה ואגרות עתידיות אינן נכללות עד לתשלום או להתחייבות בפועל.')
-          s = s.replace('הסה"כ כולל את המלונות, הרכב, הדלק הצפוי, חניית Swissôtel והוצאות ידניות.', 'הסה״כ כולל רק סכומים שכבר שולמו או שהתחייבת לשלם נכון לעכשיו: מלונות, השכרת רכב והוצאות ידניות. דלק, חניה ואגרות עתידיות אינן נכללות עד לתשלום או להתחייבות בפועל.')
 
-          planner = '<script src="./planner.js?v=20260822-4"></script>'
+          # Replace summary FX loader with a provider that supports browser CORS and two fallbacks.
+          start = s.find('async function loadSummaryFx(){')
+          end_marker = "document.getElementById('addExpenseBtn')"
+          end = s.find(end_marker, start)
+          if start != -1 and end != -1:
+              new_fx = r'''async function loadSummaryFx(){
+  const status=document.getElementById('summaryRateStatus');
+  const cached=localStorage.getItem('romania-summary-fx');
+  if(cached){try{const c=JSON.parse(cached);if(c.rates){summaryFx=c.rates;renderSummary();if(status)status.textContent='🟡 מציג שער אחרון שנשמר ומעדכן…'}}catch(e){}}
+  async function tryFrankfurter(){
+    const r=await fetch('https://api.frankfurter.dev/v1/latest?base=EUR&symbols=ILS,RON,USD',{cache:'no-store'});if(!r.ok)throw new Error('frankfurter');
+    const j=await r.json(),eurIls=Number(j.rates.ILS),eurRon=Number(j.rates.RON),eurUsd=Number(j.rates.USD);
+    if(!(eurIls>0&&eurRon>0&&eurUsd>0))throw new Error('bad rates');
+    return {EURILS:eurIls,RONILS:eurIls/eurRon,USDILS:eurIls/eurUsd};
+  }
+  async function tryOpenErApi(){
+    const r=await fetch('https://open.er-api.com/v6/latest/EUR',{cache:'no-store'});if(!r.ok)throw new Error('er-api');
+    const j=await r.json(),eurIls=Number(j.rates&&j.rates.ILS),eurRon=Number(j.rates&&j.rates.RON),eurUsd=Number(j.rates&&j.rates.USD);
+    if(!(eurIls>0&&eurRon>0&&eurUsd>0))throw new Error('bad rates');
+    return {EURILS:eurIls,RONILS:eurIls/eurRon,USDILS:eurIls/eurUsd};
+  }
+  try{
+    try{summaryFx=await tryFrankfurter()}catch(e){summaryFx=await tryOpenErApi()}
+    localStorage.setItem('romania-summary-fx',JSON.stringify({rates:summaryFx,time:new Date().toISOString()}));
+    renderSummary();if(status)status.textContent='🟢 שערי ההמרה עודכנו אונליין';
+  }catch(e){if(status)status.textContent=summaryFx.EURILS?'🟡 אין עדכון כרגע · משתמש בשער האחרון שנשמר':'🔴 לא ניתן לטעון שערי המרה כרגע'}
+}
+'''
+              s = s[:start] + new_fx + s[end:]
+
+          # Ensure the summary rate text handles USD even when an old cached object lacks it.
+          s = s.replace("document.getElementById('summaryRates').textContent=`€1 = ₪${summaryFx.EURILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`;", "document.getElementById('summaryRates').textContent=`€1 = ₪${summaryFx.EURILS.toFixed(3)} · ${summaryFx.USDILS?'$1 = ₪'+summaryFx.USDILS.toFixed(3)+' · ':''}1 RON = ₪${summaryFx.RONILS.toFixed(3)}`;")
+          s = s.replace("document.getElementById('summaryRates').textContent=`€1 = ₪${summaryFx.EURILS.toFixed(3)} · $1 = ₪${summaryFx.USDILS.toFixed(3)} · 1 RON = ₪${summaryFx.RONILS.toFixed(3)}`;", "document.getElementById('summaryRates').textContent=`€1 = ₪${summaryFx.EURILS.toFixed(3)} · ${summaryFx.USDILS?'$1 = ₪'+summaryFx.USDILS.toFixed(3)+' · ':''}1 RON = ₪${summaryFx.RONILS.toFixed(3)}`;")
+
+          planner = '<script src="./planner.js?v=20260822-5"></script>'
           navfix = '''<script>
           document.addEventListener('click', function(e){
-            const b=e.target.closest('.nav button[data-page]');
-            if(!b) return;
+            const b=e.target.closest('.nav button[data-page]'); if(!b) return;
             const page=b.dataset.page;
             setTimeout(function(){
               document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
               document.querySelectorAll('.nav button[data-page]').forEach(function(x){x.classList.toggle('on',x===b)});
-              const target=document.getElementById('page-'+page);
-              if(target) target.classList.add('on');
+              const target=document.getElementById('page-'+page); if(target) target.classList.add('on');
               if(page==='home' && typeof renderHome==='function') try{renderHome()}catch(_e){}
               if(page==='trip'){
-                try{ if(typeof installRouteEditor==='function') installRouteEditor(); }catch(_e){}
-                try{ if(typeof renderRouteEditor==='function') renderRouteEditor(); }catch(_e){}
-                try{ if(window.map && typeof map.invalidateSize==='function') setTimeout(function(){map.invalidateSize()},80); }catch(_e){}
+                try{if(typeof installRouteEditor==='function')installRouteEditor()}catch(_e){}
+                try{if(typeof renderRouteEditor==='function')renderRouteEditor()}catch(_e){}
+                try{if(window.map&&typeof map.invalidateSize==='function')setTimeout(function(){map.invalidateSize()},80)}catch(_e){}
               }
               window.scrollTo({top:0,behavior:'smooth'});
             },0);
