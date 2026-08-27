@@ -23,16 +23,23 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
+          todo=Path('todo-translate.js'); t=todo.read_text(encoding='utf-8')
+          t=t.replace("date:'2026-09-20',time:'18:30',text:'צ׳ק-אין לטיסת LY571 - 72 שעות לפני ההמראה'", "date:'2026-09-16',time:'00:20',text:'צ׳ק-אין לטיסת LY9491 - 72 שעות לפני ההמראה'")
+          t=t.replace("date:'2026-09-23',time:'14:30',text:'לבדוק דרכונים, כרטיסי טיסה, כרטיס אשראי ורישיון נהיגה'", "date:'2026-09-18',time:'20:30',text:'לבדוק דרכונים, כרטיסי טיסה, כרטיס אשראי ורישיון נהיגה'")
+          t=t.replace("date:'2026-09-23',time:'15:00',text:'יציאה לנתב״ג - טיסה LY571 ב-18:30'", "date:'2026-09-18',time:'21:00',text:'יציאה לנתב״ג - טיסה LY9491 ב-00:20'")
+          t=t.replace("date:'2026-09-23',time:'21:10',text:'נחיתה ב-OTP - להגיע לנקודת המפגש ולהזמין Shuttle של Klass Wagen'", "date:'2026-09-19',time:'03:05',text:'נחיתה ב-OTP - להגיע לנקודת המפגש ולהזמין Shuttle של Klass Wagen'")
+          t=t.replace("date:'2026-09-23',time:'21:30',text:'איסוף רכב - לבדוק דגם, סוג מנוע, דלק, נזקים קיימים ולצלם את הרכב'", "date:'2026-09-19',time:'04:00',text:'איסוף רכב - לבדוק דגם, סוג מנוע, דלק, נזקים קיימים ולצלם את הרכב'")
+          todo.write_text(t,encoding='utf-8')
+          rem=Path('reminders.js'); r=rem.read_text(encoding='utf-8').replace("start:'20260923T180000Z',end:'20260923T181500Z'", "start:'20260919T010000Z',end:'20260919T011500Z'"); rem.write_text(r,encoding='utf-8')
+          planner=Path('planner.js'); q=planner.read_text(encoding='utf-8').replace("const TRIP_START=new Date('2026-09-23T00:00:00+03:00');", "const TRIP_START=new Date('2026-09-19T00:20:00+03:00');"); planner.write_text(q,encoding='utf-8')
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
           s=s.replace('<option value="RON">RON</option><option value="EUR">EUR</option><option value="ILS">ILS</option>', '<option value="RON">RON</option><option value="EUR">EUR</option><option value="USD">USD ($)</option><option value="ILS">ILS</option>')
           s=s.replace('סה״כ משוער','סה״כ:').replace('כולל ההוצאות הידניות שהוספת','שולם או התחייבת לשלם נכון לעכשיו')
-          for name in ('planner','expenses-fix','car-editor','summary-v2','reminders','todo-translate','sync-migration','family-sync'):
+          for name in ('planner','expenses-fix','car-editor','summary-v2','reminders','todo-translate','sync-migration','family-sync','trip-update'):
               s=re.sub(r'<script src="\./'+re.escape(name)+r'\.js\?v=[^"]+"></script>','',s)
-          scripts='<script src="./planner.js?v=20260822-12"></script><script src="./car-editor.js?v=20260822-3"></script><script src="./summary-v2.js?v=20260822-3"></script><script src="./reminders.js?v=20260822-3"></script><script src="./todo-translate.js?v=20260822-3"></script><script src="./sync-migration.js?v=20260822-2"></script><script src="./family-sync.js?v=20260822-1"></script>'
+          scripts='<script src="./planner.js?v=20260827-1"></script><script src="./car-editor.js?v=20260827-1"></script><script src="./summary-v2.js?v=20260827-1"></script><script src="./reminders.js?v=20260827-1"></script><script src="./todo-translate.js?v=20260827-1"></script><script src="./sync-migration.js?v=20260827-1"></script><script src="./trip-update.js?v=20260827-1"></script><script src="./family-sync.js?v=20260827-1"></script>'
           nav='''<script>document.addEventListener('click',function(e){const b=e.target.closest('.nav button[data-page]');if(!b)return;const page=b.dataset.page;setTimeout(function(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('on',x===b));document.getElementById('page-'+page)?.classList.add('on');if(page==='home'&&typeof renderHome==='function')try{renderHome()}catch(e){}if(page==='summary'&&window.RomaniaSummary)try{window.RomaniaSummary.render()}catch(e){}if(page==='todo'&&window.RomaniaTodo)try{window.RomaniaTodo.render()}catch(e){}if(page==='trip'&&window.map&&typeof map.invalidateSize==='function')setTimeout(()=>map.invalidateSize(),80);window.scrollTo({top:0,behavior:'smooth'});},0)},true);</script>'''
-          s=s.replace('</body>',scripts+nav+'</body>')
-          p.write_text(s,encoding='utf-8')
+          s=s.replace('</body>',scripts+nav+'</body>'); p.write_text(s,encoding='utf-8')
           PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
