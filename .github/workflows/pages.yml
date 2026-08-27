@@ -23,13 +23,19 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
+          planner=Path('planner.js')
+          q=planner.read_text(encoding='utf-8')
+          q=q.replace("{n:'ראשון · פרדיאל',note:'טרם נקבע מסלול ליום הזה.',s:[['Hotel Orizont Predeal',45.503,25.578,'09:00','ארוחת בוקר / יום חופשי באזור פרדיאל'],['Hotel Orizont Predeal',45.503,25.578,'20:00','חזרה למלון']]}","{n:'ראשון · פרדיאל',note:'',s:[['Hotel Orizont Predeal',45.503,25.578,'','מלון']]}")
+          q=q.replace("{n:'שני · פרדיאל',note:'טרם נקבע מסלול ליום הזה.',s:[['Hotel Orizont Predeal',45.503,25.578,'09:00','ארוחת בוקר / יום חופשי באזור פרדיאל'],['Hotel Orizont Predeal',45.503,25.578,'20:00','חזרה למלון']]}","{n:'שני · פרדיאל',note:'',s:[['Hotel Orizont Predeal',45.503,25.578,'','מלון']]}")
+          q=q.replace("{n:'שלישי · פרדיאל',note:'טרם נקבע מסלול ליום הזה.',s:[['Hotel Orizont Predeal',45.503,25.578,'09:00','ארוחת בוקר / יום חופשי באזור פרדיאל'],['Hotel Orizont Predeal',45.503,25.578,'20:00','חזרה למלון']]}","{n:'שלישי · פרדיאל',note:'',s:[['Hotel Orizont Predeal',45.503,25.578,'','מלון']]}")
+          planner.write_text(q,encoding='utf-8')
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
           s=s.replace('<option value="RON">RON</option><option value="EUR">EUR</option><option value="ILS">ILS</option>', '<option value="RON">RON</option><option value="EUR">EUR</option><option value="USD">USD ($)</option><option value="ILS">ILS</option>')
           s=s.replace('סה״כ משוער','סה״כ:').replace('כולל ההוצאות הידניות שהוספת','שולם או התחייבת לשלם נכון לעכשיו')
           for name in ('planner','expenses-fix','car-editor','summary-v2','reminders','todo-translate','sync-migration','family-sync','trip-update'):
               s=re.sub(r'<script src="\./'+re.escape(name)+r'\.js\?v=[^"]+"></script>','',s)
-          scripts='<script src="./planner.js?v=20260827-3"></script><script src="./car-editor.js?v=20260827-3"></script><script src="./summary-v2.js?v=20260827-3"></script><script src="./reminders.js?v=20260827-3"></script><script src="./todo-translate.js?v=20260827-3"></script><script src="./sync-migration.js?v=20260827-3"></script><script src="./trip-update.js?v=20260827-3"></script><script src="./family-sync.js?v=20260827-3"></script>'
+          scripts='<script src="./planner.js?v=20260827-4"></script><script src="./car-editor.js?v=20260827-4"></script><script src="./summary-v2.js?v=20260827-4"></script><script src="./reminders.js?v=20260827-4"></script><script src="./todo-translate.js?v=20260827-4"></script><script src="./sync-migration.js?v=20260827-4"></script><script src="./trip-update.js?v=20260827-4"></script><script src="./family-sync.js?v=20260827-4"></script>'
           nav='''<script>document.addEventListener('click',function(e){const b=e.target.closest('.nav button[data-page]');if(!b)return;const page=b.dataset.page;setTimeout(function(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('on',x===b));document.getElementById('page-'+page)?.classList.add('on');if(page==='home'&&typeof renderHome==='function')try{renderHome()}catch(e){}if(page==='summary'&&window.RomaniaSummary)try{window.RomaniaSummary.render()}catch(e){}if(page==='todo'&&window.RomaniaTodo)try{window.RomaniaTodo.render()}catch(e){}if(page==='trip'&&window.map&&typeof map.invalidateSize==='function')setTimeout(()=>map.invalidateSize(),80);window.scrollTo({top:0,behavior:'smooth'});},0)},true);</script>'''
           s=s.replace('</body>',scripts+nav+'</body>')
           p.write_text(s,encoding='utf-8')
