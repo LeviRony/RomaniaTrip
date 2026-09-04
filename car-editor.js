@@ -1,11 +1,26 @@
 (()=>{
 const KEY='romania-rental-car-details';
 const defaults={model:'Volkswagen Tiguan Automatic או דומה',engine:'לא ידוע עדיין',fuel:'petrol'};
+const BOOKING={number:'OTP-2468182759765',pickup:'19.9.2026 · 04:00',dropoff:'30.9.2026 · 08:30',location:'OTP-AIR',flight:'LY9491',arrival:'OTP',cover:'Klass Total Cover'};
 function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
 function save(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function fuelLabel(v){return ({petrol:'בנזין',diesel:'דיזל',hybrid:'היברידי',phev:'פלאג־אין היברידי'})[v]||v}
 function syncFuel(v){const fuel=document.getElementById('fuelType');if(!fuel)return;fuel.value=v==='diesel'?'diesel':'petrol';fuel.dispatchEvent(new Event('change',{bubbles:true}));}
+function updateBookingDisplay(){
+ const page=document.getElementById('page-car');if(!page)return;
+ const first=page.querySelector('.grid .card');
+ if(first){
+  const p=first.querySelector('p');
+  if(p)p.innerHTML=`<b>Volkswagen Tiguan Automatic</b> או דומה<br>${BOOKING.pickup} → ${BOOKING.dropoff}<br>${BOOKING.cover}<br><span class="muted">הזמנה: <span class="ltr">${BOOKING.number}</span></span>`;
+ }
+ const grid=page.querySelector('.grid');
+ if(grid&&!document.getElementById('bookingFlightCard')){
+  const card=document.createElement('div');card.className='card';card.id='bookingFlightCard';
+  card.innerHTML=`<b>✈️ פרטי טיסה עודכנו בחברת ההשכרה</b><div class="ok" style="margin-top:10px"><b>✅ מספר הטיסה עודכן בהצלחה</b><br>טיסה <span class="ltr"><b>${BOOKING.flight}</b></span> · נחיתה ב־${BOOKING.arrival}</div><p><b>איסוף:</b> ${BOOKING.pickup}<br><b>מיקום:</b> ${BOOKING.location}<br><b>החזרה:</b> ${BOOKING.dropoff}<br><b>מספר הזמנה חדש:</b> <span class="ltr">${BOOKING.number}</span></p>`;
+  grid.appendChild(card);
+ }
+}
 function updateDisplay(v){
  const page=document.getElementById('page-car');if(!page)return;
  const first=page.querySelector('.grid .card');
@@ -14,7 +29,9 @@ function updateDisplay(v){
  syncFuel(v.fuel);
 }
 function build(){
- const page=document.getElementById('page-car');if(!page||document.getElementById('carEditorCard'))return;
+ const page=document.getElementById('page-car');if(!page)return;
+ updateBookingDisplay();
+ if(document.getElementById('carEditorCard')){updateDisplay(load());return}
  const firstGrid=page.querySelector('.grid');if(!firstGrid)return;
  const v=load();
  const card=document.createElement('div');card.id='carEditorCard';card.className='card';card.style.marginTop='14px';
@@ -28,5 +45,5 @@ function build(){
  updateDisplay(v);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();
-document.addEventListener('click',e=>{const b=e.target.closest('.nav button[data-page="car"]');if(b)setTimeout(()=>{build();updateDisplay(load())},0)},true);
+document.addEventListener('click',e=>{const b=e.target.closest('.nav button[data-page="car"]');if(b)setTimeout(()=>{build();updateBookingDisplay();updateDisplay(load())},0)},true);
 })();
