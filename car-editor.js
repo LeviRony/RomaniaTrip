@@ -4,15 +4,20 @@ const defaults={model:'Volkswagen Tiguan Automatic או דומה',engine:'לא �
 const BOOKING={number:'OTP-2468182759765',pickup:'19.9.2026 · 04:00',dropoff:'30.9.2026 · 08:30',location:'OTP-AIR',flight:'LY9491',arrival:'OTP',cover:'Klass Total Cover'};
 function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
 function save(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function esc(s){return String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]))}
 function fuelLabel(v){return ({petrol:'בנזין',diesel:'דיזל',hybrid:'היברידי',phev:'פלאג־אין היברידי'})[v]||v}
 function syncFuel(v){const fuel=document.getElementById('fuelType');if(!fuel)return;fuel.value=v==='diesel'?'diesel':'petrol';fuel.dispatchEvent(new Event('change',{bubbles:true}));}
 function updateBookingDisplay(){
  const page=document.getElementById('page-car');if(!page)return;
- const first=page.querySelector('.grid .card');
+ const cards=[...page.querySelectorAll('.grid .card')];
+ const first=cards[0];
  if(first){
   const p=first.querySelector('p');
   if(p)p.innerHTML=`<b>Volkswagen Tiguan Automatic</b> או דומה<br>${BOOKING.pickup} → ${BOOKING.dropoff}<br>${BOOKING.cover}<br><span class="muted">הזמנה: <span class="ltr">${BOOKING.number}</span></span>`;
+ }
+ const supportCard=cards.find(c=>c.textContent.includes('+40 374 020 002')||c.textContent.includes('24/7'));
+ if(supportCard){
+  supportCard.innerHTML=`<b>📞 Klass Wagen · 24/7</b><p><a class="phone" dir="ltr" href="tel:+40374020002">+40 374 020 002</a></p><p>Visa/MasterCard פיזי על שם בעל החוזה. לאחר הנחיתה להגיע לנקודת המפגש ולהזמין Shuttle.</p><div class="ok"><b>✈️ מספר הטיסה אצל Klass Wagen:</b> <span class="ltr"><b>${BOOKING.flight}</b></span><br><span class="muted">המספר כבר עודכן בהזמנה.</span></div>`;
  }
  const grid=page.querySelector('.grid');
  if(grid&&!document.getElementById('bookingFlightCard')){
