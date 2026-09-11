@@ -6,12 +6,40 @@ const MEMBER_KEY='romania-sync-member';
 const MIGRATED_KEY='romania-sync-migrated-v1';
 const LAST_SYNC_KEY='romania-last-sync';
 const TODO_DELETED_KEY='romania-todo-deleted-v1';
+const TRIP_TZ='Europe/Bucharest';
 const device=(()=>{let d=localStorage.getItem(DEVICE_KEY);if(!d){d='dev-'+crypto.randomUUID();localStorage.setItem(DEVICE_KEY,d)}return d})();
 function endpoint(){return (localStorage.getItem(ENDPOINT_KEY)||'').trim()}
 function member(){return (localStorage.getItem(MEMBER_KEY)||'').trim()||'Family'}
 function setStatus(text,cls=''){const el=document.getElementById('familySyncStatus');if(el){el.textContent=text;el.dataset.state=cls}}
 function safeJson(key,def){try{return JSON.parse(localStorage.getItem(key)||'null')??def}catch(e){return def}}
 function deletedTodoIds(){return new Set((safeJson(TODO_DELETED_KEY,[])||[]).map(String))}
+function normalizeDate(v){
+ const s=String(v??'').trim().replace(/^d:/,'').replace(/^'/,'');
+ if(!s)return '';
+ if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+ if(/^\d{4}-\d{2}-\d{2}T/.test(s)){
+   const d=new Date(s);
+   if(!Number.isNaN(d.getTime())){
+     try{
+       const parts=new Intl.DateTimeFormat('en-CA',{timeZone:TRIP_TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);
+       const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));
+       return `${p.year}-${p.month}-${p.day}`;
+     }catch(e){}
+   }
+ }
+ const m=s.match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
+ return m?`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`:s.slice(0,10);
+}
+function normalizeTime(v){
+ const s=String(v??'').trim().replace(/^t:/,'').replace(/^'/,'');
+ const m=s.match(/^(\d{1,2}):(\d{2})/);
+ if(m)return `${m[1].padStart(2,'0')}:${m[2]}`;
+ if(/^\d{4}-\d{2}-\d{2}T/.test(s)){
+   const d=new Date(s);
+   if(!Number.isNaN(d.getTime()))try{return new Intl.DateTimeFormat('en-GB',{timeZone:TRIP_TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(d)}catch(e){}
+ }
+ return s;
+}
 function localPayload(){
  const expenses=safeJson('romania-manual-expenses-v2',safeJson('romania-manual-expenses',[]));
  const deleted=deletedTodoIds();
@@ -22,7 +50,8 @@ function localPayload(){
  const carRows=Object.entries(car||{}).map(([key,value])=>({key,value,updatedBy:member(),updatedAt:new Date().toISOString()}));
  Object.entries(fuel).forEach(([key,value])=>{if(value)carRows.push({key:'fuel_'+key,value,updatedBy:member(),updatedAt:new Date().toISOString()})});
  const expRows=(Array.isArray(expenses)?expenses:[]).map(x=>({id:String(x.id||crypto.randomUUID()),createdAt:x.createdAt||new Date().toISOString(),amount:Number(x.amount)||0,currency:x.currency||'ILS',description:x.description||'',category:x.category||'',paidBy:x.paidBy||member(),status:x.status||'committed',updatedBy:member(),updatedAt:new Date().toISOString()}));
- const todoRows=(Array.isArray(todo)?todo:[]).map(x=>({id:String(x.id||crypto.randomUUID()),date:x.date||'',time:x.time||'',text:x.text||'',category:x.cat||x.category||'',done:!!x.done,reminderMinutes:x.reminderMinutes||'',custom:!!x.custom,updatedBy:member(),updatedAt:new Date().toISOString()}));
+ // Prefix date/time values so Google Sheets never auto-converts them to Date objects.
+ const todoRows=(Array.isArray(todo)?todo:[]).map(x=>({id:String(x.id||crypto.randomUUID()),date:'d:'+normalizeDate(x.date),time:'t:'+normalizeTime(x.time),text:x.text||'',category:x.cat||x.category||'',done:!!x.done,reminderMinutes:x.reminderMinutes||'',custom:!!x.custom,updatedBy:member(),updatedAt:new Date().toISOString()}));
  const itineraryRows=[];
  if(Array.isArray(itinerary)) itinerary.forEach((day,di)=>(day?.s||[]).forEach((s,si)=>itineraryRows.push({id:`${di}-${si}-${String(s[0]).slice(0,40)}`,date:`2026-09-${String(23+di).padStart(2,'0')}`,time:s[3]||'',name:s[0]||'',description:s[4]||'',lat:s[1]||'',lng:s[2]||'',status:'planned',selected:true,updatedBy:member(),updatedAt:new Date().toISOString()})));
  return {Expenses:expRows,Todo:todoRows,Car:carRows,Itinerary:itineraryRows,Votes:[],Family:[],Settings:[]};
@@ -31,7 +60,7 @@ async function api(body){const url=endpoint();if(!url)throw new Error('NO_ENDPOI
 async function getSnapshot(){const url=endpoint();if(!url)throw new Error('NO_ENDPOINT');const r=await fetch(url+'?action=snapshot&t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}
 function applySnapshot(data){if(!data)return;
  if(Array.isArray(data.Expenses)){localStorage.setItem('romania-manual-expenses-v2',JSON.stringify(data.Expenses.map(x=>({id:String(x.id),createdAt:x.createdAt,amount:Number(x.amount),currency:x.currency,description:x.description,category:x.category,paidBy:x.paidBy,status:x.status}))))}
- if(Array.isArray(data.Todo)){const deleted=deletedTodoIds();localStorage.setItem('romania-todo-v1',JSON.stringify(data.Todo.filter(x=>!deleted.has(String(x.id))).map(x=>({id:String(x.id),date:String(x.date).slice(0,10),time:String(x.time||''),text:x.text,cat:x.category,done:String(x.done)==='true'||x.done===true,reminderMinutes:x.reminderMinutes,custom:String(x.custom)==='true'||x.custom===true}))))}
+ if(Array.isArray(data.Todo)){const deleted=deletedTodoIds();localStorage.setItem('romania-todo-v1',JSON.stringify(data.Todo.filter(x=>!deleted.has(String(x.id))).map(x=>({id:String(x.id),date:normalizeDate(x.date),time:normalizeTime(x.time),text:x.text,cat:x.category,done:String(x.done)==='true'||x.done===true,reminderMinutes:x.reminderMinutes,custom:String(x.custom)==='true'||x.custom===true}))))}
  if(Array.isArray(data.Car)){const obj={};data.Car.forEach(x=>obj[x.key]=x.value);const car={model:obj.model||'Volkswagen Tiguan Automatic או דומה',engine:obj.engine||'לא ידוע עדיין',fuel:obj.fuel||'petrol'};localStorage.setItem('romania-rental-car-details',JSON.stringify(car));if(obj.fuel_type)localStorage.setItem('fuelType',obj.fuel_type);if(obj.fuel_consumption)localStorage.setItem('fuelConsumption',obj.fuel_consumption);if(obj.fuel_price)localStorage.setItem('fuelPrice',obj.fuel_price)}
  try{window.RomaniaSummary?.render?.();window.RomaniaTodo?.render?.();window.renderHome?.()}catch(e){}
 }
