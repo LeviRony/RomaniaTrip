@@ -58,14 +58,25 @@ function syncPayload_(body) {
 }
 
 function readSheetObjects_(name) {
-  const sh = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(name);
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sh = ss.getSheetByName(name);
   if (!sh) return [];
   const values = sh.getDataRange().getValues();
   if (!values.length) return [];
   const headers = values[0].map(String);
+  const tz = ss.getSpreadsheetTimeZone() || Session.getScriptTimeZone() || 'Europe/Bucharest';
   return values.slice(1).filter(r => r.some(v => v !== '')).map(row => {
     const o = {};
-    headers.forEach((h,i) => { if (h) o[h] = row[i]; });
+    headers.forEach((h,i) => {
+      if (!h) return;
+      const v = row[i];
+      if (v instanceof Date && !isNaN(v.getTime())) {
+        const key = h.toLowerCase();
+        if (key === 'date' || key.endsWith('date')) o[h] = Utilities.formatDate(v, tz, 'yyyy-MM-dd');
+        else if (key === 'time' || key.endsWith('time')) o[h] = Utilities.formatDate(v, tz, 'HH:mm');
+        else o[h] = Utilities.formatDate(v, tz, "yyyy-MM-dd'T'HH:mm:ss");
+      } else o[h] = v;
+    });
     return o;
   });
 }
