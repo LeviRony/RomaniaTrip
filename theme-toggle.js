@@ -12,10 +12,10 @@ function injectStyle(){if(document.getElementById('romania-theme-style'))return;
 :root[data-theme="dark"] .brand{color:#fff!important}
 :root[data-theme="dark"] .nav button{background:#ffffff10!important;color:#f5fbfc!important;border-color:#ffffff55!important;text-shadow:none!important}
 :root[data-theme="dark"] .nav button.on{background:#eaf6f8!important;color:#07576a!important;border-color:#eaf6f8!important}
-:root[data-theme="dark"] .card,:root[data-theme="dark"] .edit-day,:root[data-theme="dark"] .attraction-row,:root[data-theme="dark"] .metric,:root[data-theme="dark"] .facts div,:root[data-theme="dark"] .summary-row,:root[data-theme="dark"] .expense-item,:root[data-theme="dark"] .summary-note,:root[data-theme="dark"] .bike-options,:root[data-theme="dark"] .bike-option,:root[data-theme="dark"] .home-item{background:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important}
-:root[data-theme="dark"] .card h1,:root[data-theme="dark"] .card h2,:root[data-theme="dark"] .card h3,:root[data-theme="dark"] .card h4,:root[data-theme="dark"] .card b,:root[data-theme="dark"] .card strong,:root[data-theme="dark"] .card p,:root[data-theme="dark"] .home-item,:root[data-theme="dark"] .home-item *{color:var(--text)!important}
-:root[data-theme="dark"] .muted,:root[data-theme="dark"] .source{color:var(--muted)!important}
-:root[data-theme="dark"] .price,:root[data-theme="dark"] .wx,:root[data-theme="dark"] .metric b,:root[data-theme="dark"] .summary-ils,:root[data-theme="dark"] .phone,:root[data-theme="dark"] a:not(.btn){color:#68d7ee!important}
+:root[data-theme="dark"] .card,:root[data-theme="dark"] .edit-day,:root[data-theme="dark"] .attraction-row,:root[data-theme="dark"] .metric,:root[data-theme="dark"] .facts div,:root[data-theme="dark"] .summary-row,:root[data-theme="dark"] .expense-item,:root[data-theme="dark"] .summary-note,:root[data-theme="dark"] .bike-options,:root[data-theme="dark"] .bike-option,:root[data-theme="dark"] .home-item,:root[data-theme="dark"] .emergency-card{background:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important}
+:root[data-theme="dark"] .card h1,:root[data-theme="dark"] .card h2,:root[data-theme="dark"] .card h3,:root[data-theme="dark"] .card h4,:root[data-theme="dark"] .card b,:root[data-theme="dark"] .card strong,:root[data-theme="dark"] .card p,:root[data-theme="dark"] .home-item,:root[data-theme="dark"] .home-item *,:root[data-theme="dark"] .emergency-card h3,:root[data-theme="dark"] .emergency-card p,:root[data-theme="dark"] .emergency-card b,:root[data-theme="dark"] .flight-row{color:var(--text)!important}
+:root[data-theme="dark"] .muted,:root[data-theme="dark"] .source,:root[data-theme="dark"] #insStatus{color:var(--muted)!important}
+:root[data-theme="dark"] .price,:root[data-theme="dark"] .wx,:root[data-theme="dark"] .metric b,:root[data-theme="dark"] .summary-ils,:root[data-theme="dark"] .phone,:root[data-theme="dark"] .emergency-number,:root[data-theme="dark"] a:not(.btn){color:#68d7ee!important}
 :root[data-theme="dark"] .pill{background:#274854!important;color:#f1fafc!important}
 :root[data-theme="dark"] .facts div,:root[data-theme="dark"] .metric,:root[data-theme="dark"] .summary-row:not(.total),:root[data-theme="dark"] .expense-item,:root[data-theme="dark"] .summary-note{background:var(--soft)!important;color:var(--text)!important}
 :root[data-theme="dark"] .rule{background:#3b3218!important;color:#fff0bd!important;border-right-color:#c99a24!important}
@@ -23,13 +23,15 @@ function injectStyle(){if(document.getElementById('romania-theme-style'))return;
 :root[data-theme="dark"] .home-hero{background:linear-gradient(135deg,#0b5b6d,#0f819b)!important;color:#fff!important}
 :root[data-theme="dark"] .home-kpi{background:#ffffff12!important;border-color:#ffffff35!important;color:#fff!important}
 :root[data-theme="dark"] .today-badge{background:#dff5fa!important;color:#07576a!important}
-:root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea,:root[data-theme="dark"] option,:root[data-theme="dark"] [data-remind-select]{background:#0e2027!important;color:var(--text)!important;border-color:var(--line)!important}
+:root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea,:root[data-theme="dark"] option,:root[data-theme="dark"] [data-remind-select],:root[data-theme="dark"] #page-emergency input{background:#0e2027!important;color:var(--text)!important;border-color:var(--line)!important}
 :root[data-theme="dark"] .warn{background:#4a3b12!important;color:#fff0bd!important;border-color:#a97c14!important}
 :root[data-theme="dark"] .warn *{color:#fff0bd!important}
 :root[data-theme="dark"] .ok{background:#123d26!important;color:#e5f8e9!important;border-color:#45b563!important}
 :root[data-theme="dark"] .ok *{color:#e5f8e9!important}
 :root[data-theme="dark"] .btn{background:#20a7c3!important;color:#fff!important}
 :root[data-theme="dark"] .danger-btn{color:#fff!important}
+:root[data-theme="dark"] .emergency-actions a,:root[data-theme="dark"] .emergency-actions button{background:#20a7c3!important;color:#fff!important;border:1px solid #48bfd5!important}
+:root[data-theme="dark"] .flight-row{border-bottom-color:var(--line)!important}
 :root[data-theme="dark"] .tab,:root[data-theme="dark"] .quick button{background:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important}
 :root[data-theme="dark"] .tab.on{background:var(--p)!important;color:#fff!important}
 :root[data-theme="dark"] .stop{background:var(--card)!important;color:var(--text)!important;border-bottom-color:var(--line)!important}
