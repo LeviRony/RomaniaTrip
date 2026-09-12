@@ -1,15 +1,26 @@
 (()=>{
 const KEY='romania-manual-expenses';
-const PREPAID=[
- {amount:2000,currency:'RON',description:'הזמנת מט״ח לנסיעה · 2,000 RON · הזמנה 625700676 · איסוף 18/09/2026',orderNumber:'625700676',createdAt:'2026-09-12T07:36:58Z'},
- {amount:500,currency:'EUR',description:'הזמנת מט״ח לנסיעה · 500 EUR · הזמנה 625700681 · איסוף 18/09/2026',orderNumber:'625700681',createdAt:'2026-09-12T07:37:18Z'}
+const FIXED=[
+ {key:'intl-license',amount:23,currency:'ILS',description:'רישיון נהיגה בין לאומי',displayOriginal:'₪23',createdAt:'2026-09-12T07:41:00Z'},
+ {key:'esim-3',amount:61,currency:'ILS',description:'eSIM 3',displayOriginal:'$20.2',createdAt:'2026-09-12T07:41:00Z'},
+ {key:'fx-eur-500',amount:1837,currency:'ILS',description:'500 אירו מטח · הזמנה 625700681',displayOriginal:'₪1,837',orderNumber:'625700681',createdAt:'2026-09-12T07:37:18Z'},
+ {key:'fx-ron-2000',amount:1397,currency:'ILS',description:'2000 ליאו רומני מטח · הזמנה 625700676',displayOriginal:'₪1,397',orderNumber:'625700676',createdAt:'2026-09-12T07:36:58Z'}
 ];
 function get(){try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
 function save(v){try{localStorage.setItem(KEY,JSON.stringify(v));return true}catch(e){return false}}
-function seedPrepaid(){const a=get();let changed=false;PREPAID.forEach(x=>{if(!a.some(y=>y.orderNumber===x.orderNumber||String(y.description||'').includes(x.orderNumber))){a.push(x);changed=true}});if(changed)save(a)}
+function seedFixed(){
+ let a=get();
+ const orderNos=new Set(FIXED.map(x=>x.orderNumber).filter(Boolean));
+ a=a.filter(x=>!orderNos.has(x.orderNumber)&&!Array.from(orderNos).some(n=>String(x.description||'').includes(n)));
+ FIXED.forEach(x=>{
+   const i=a.findIndex(y=>y.key===x.key||String(y.description||'').trim()===x.description);
+   if(i>=0)a[i]=x;else a.push(x);
+ });
+ save(a);
+}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function moneyOriginal(x){const sym=x.currency==='USD'?'$':x.currency==='EUR'?'€':x.currency==='ILS'?'₪':'';return `${sym}${Number(x.amount).toLocaleString('he-IL',{maximumFractionDigits:2})}${sym?'':' '+x.currency}`}
-function ilsFor(x){try{if(typeof toIls==='function'){const n=toIls(x.amount,x.currency);return Number.isFinite(n)&&n>0?'₪'+Math.round(n).toLocaleString('he-IL'):'ממתין לשער'}}catch(e){}return x.currency==='ILS'?'₪'+Math.round(Number(x.amount)).toLocaleString('he-IL'):'ממתין לשער'}
+function moneyOriginal(x){if(x.displayOriginal)return x.displayOriginal;const sym=x.currency==='USD'?'$':x.currency==='EUR'?'€':x.currency==='ILS'?'₪':'';return `${sym}${Number(x.amount).toLocaleString('he-IL',{maximumFractionDigits:2})}${sym?'':' '+x.currency}`}
+function ilsFor(x){if(x.currency==='ILS')return '₪'+Math.round(Number(x.amount)).toLocaleString('he-IL');try{if(typeof toIls==='function'){const n=toIls(x.amount,x.currency);return Number.isFinite(n)&&n>0?'₪'+Math.round(n).toLocaleString('he-IL'):'ממתין לשער'}}catch(e){}return 'ממתין לשער'}
 function render(){
  const list=get(),table=document.getElementById('expenseTable'),rows=document.getElementById('manualSummaryRows');
  if(table){table.innerHTML=list.length?'':'<div class="muted">עדיין לא נוספו הוצאות ידניות.</div>';list.forEach((x,i)=>table.insertAdjacentHTML('beforeend',`<div class="expense-item"><b class="ltr">${esc(moneyOriginal(x))}</b><span class="summary-ils">${esc(ilsFor(x))}</span><span>${esc(x.description||'הוצאה נוספת')}</span><button class="danger-btn" type="button" data-expense-delete-fix="${i}">מחק</button></div>`));table.querySelectorAll('[data-expense-delete-fix]').forEach(b=>b.onclick=()=>{const a=get();a.splice(Number(b.dataset.expenseDeleteFix),1);save(a);render();try{if(typeof renderSummary==='function')renderSummary()}catch(e){}})}
@@ -24,13 +35,33 @@ function add(){
  if(amountEl)amountEl.value='';if(descEl)descEl.value='';
  render();try{if(typeof renderSummary==='function')renderSummary()}catch(e){}
 }
+function parseIls(s){const n=Number(String(s||'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0}
+function removeSwissParking(){
+ const p=document.getElementById('sumParking');
+ if(p){const row=p.closest('.summary-row');if(row)row.style.display='none'}
+ document.querySelectorAll('#page-hotels .warn').forEach(el=>{if(el.textContent.includes('חניה:')&&el.closest('.card')?.textContent.includes('Swissôtel'))el.style.display='none'});
+}
+function adjustGrandTotalWithoutParking(){
+ const p=document.getElementById('sumParking'),g=document.getElementById('summaryGrandTotal');
+ if(!p||!g)return;
+ const park=parseIls(p.textContent),total=parseIls(g.textContent);
+ if(park>0&&total>=park)g.textContent='₪'+Math.round(total-park).toLocaleString('he-IL');
+}
+function patchSummary(){
+ if(typeof window.renderSummary==='function'&&!window.renderSummary.__noSwissParking){
+   const original=window.renderSummary;
+   const wrapped=function(){const r=original.apply(this,arguments);removeSwissParking();adjustGrandTotalWithoutParking();render();return r};
+   wrapped.__noSwissParking=true;window.renderSummary=wrapped;
+ }
+ removeSwissParking();adjustGrandTotalWithoutParking();
+}
 function install(){
- seedPrepaid();
+ seedFixed();
  const btn=document.getElementById('addExpenseBtn');
  if(btn&&!btn.dataset.expenseFix){btn.dataset.expenseFix='1';btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();add()},true)}
- render();
- document.querySelector('[data-page="summary"]')?.addEventListener('click',()=>setTimeout(render,20));
- window.addEventListener('storage',e=>{if(e.key===KEY)render()});
+ render();patchSummary();
+ document.querySelector('[data-page="summary"]')?.addEventListener('click',()=>setTimeout(()=>{render();patchSummary()},30));
+ window.addEventListener('storage',e=>{if(e.key===KEY){render();try{if(typeof renderSummary==='function')renderSummary()}catch(_){}}});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 window.renderManualExpenses=render;
