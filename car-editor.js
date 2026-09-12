@@ -11,44 +11,15 @@ function updateBookingDisplay(){
  const page=document.getElementById('page-car');if(!page)return;
  const cards=[...page.querySelectorAll('.grid .card')];
  const first=cards[0];
- if(first){
-  const p=first.querySelector('p');
-  if(p)p.innerHTML=`<b>Volkswagen Tiguan Automatic</b> או דומה<br>${BOOKING.pickup} → ${BOOKING.dropoff}<br>${BOOKING.cover}<br><span class="muted">הזמנה: <span class="ltr">${BOOKING.number}</span></span>`;
- }
+ if(first){const p=first.querySelector('p');if(p)p.innerHTML=`<b>Volkswagen Tiguan Automatic</b> או דומה<br>${BOOKING.pickup} → ${BOOKING.dropoff}<br>${BOOKING.cover}<br><span class="muted">הזמנה: <span class="ltr">${BOOKING.number}</span></span>`;}
  const supportCard=cards.find(c=>c.textContent.includes('+40 374 020 002')||c.textContent.includes('24/7'));
- if(supportCard){
-  supportCard.innerHTML=`<b>📞 Klass Wagen · 24/7</b><p><a class="phone" dir="ltr" href="tel:+40374020002">+40 374 020 002</a></p><p>Visa/MasterCard פיזי על שם בעל החוזה. לאחר הנחיתה להגיע לנקודת המפגש ולהזמין Shuttle.</p><div class="ok"><b>✈️ מספר הטיסה אצל Klass Wagen:</b> <span class="ltr"><b>${BOOKING.flight}</b></span><br><span class="muted">המספר כבר עודכן בהזמנה.</span></div>`;
- }
+ if(supportCard){supportCard.innerHTML=`<b>📞 Klass Wagen · סיוע 24/7</b><p><a class="phone" dir="ltr" href="tel:+40374020002">+40 374 020 002</a></p><p>Visa/MasterCard פיזי על שם בעל החוזה.</p><div class="ok"><b>✈️ מספר הטיסה אצל Klass Wagen:</b> <span class="ltr"><b>${BOOKING.flight}</b></span><br><span class="muted">המספר כבר עודכן בהזמנה.</span></div>`;}
  const grid=page.querySelector('.grid');
- if(grid&&!document.getElementById('bookingFlightCard')){
-  const card=document.createElement('div');card.className='card';card.id='bookingFlightCard';
-  card.innerHTML=`<b>✈️ פרטי טיסה עודכנו בחברת ההשכרה</b><div class="ok" style="margin-top:10px"><b>✅ מספר הטיסה עודכן בהצלחה</b><br>טיסה <span class="ltr"><b>${BOOKING.flight}</b></span> · נחיתה ב־${BOOKING.arrival}</div><p><b>איסוף:</b> ${BOOKING.pickup}<br><b>מיקום:</b> ${BOOKING.location}<br><b>החזרה:</b> ${BOOKING.dropoff}<br><b>מספר הזמנה חדש:</b> <span class="ltr">${BOOKING.number}</span></p>`;
-  grid.appendChild(card);
- }
+ if(grid&&!document.getElementById('shuttleMeetingCard')){const card=document.createElement('div');card.className='card';card.id='shuttleMeetingCard';card.innerHTML=`<h2 style="margin-top:0">🚌 נקודת מפגש לשאטל ב־OTP</h2><div class="warn"><b>אחרי איסוף המזוודות:</b> לצאת מאזור ה־Baggage Claim ולעבור ל־<b>Departure Terminal</b>.</div><p>להגיע ל־<b>Gate D</b> — השער האחרון באזור Departures. נקודת האיסוף נמצאת <b>בחניה המסומנת בצהוב מול הטרמינל</b>.</p><p>מיניבוס עם הכיתוב <b>Klass Wagen</b> יאסוף אתכם משם.</p><div class="ok"><b>📞 כשיצאתם מאיסוף המזוודות או כשהגעתם לנקודת המפגש:</b><br><a class="phone" dir="ltr" href="tel:+40374779709">+40 374 779 709</a></div><p><b>☎️ סיוע במקרה הצורך:</b> <a class="phone" dir="ltr" href="tel:+40374020002">+40 374 020 002</a></p>`;grid.appendChild(card);}
+ if(grid&&!document.getElementById('bookingFlightCard')){const card=document.createElement('div');card.className='card';card.id='bookingFlightCard';card.innerHTML=`<b>✈️ פרטי טיסה עודכנו בחברת ההשכרה</b><div class="ok" style="margin-top:10px"><b>✅ מספר הטיסה עודכן בהצלחה</b><br>טיסה <span class="ltr"><b>${BOOKING.flight}</b></span> · נחיתה ב־${BOOKING.arrival}</div><p><b>איסוף:</b> ${BOOKING.pickup}<br><b>מיקום:</b> ${BOOKING.location}<br><b>החזרה:</b> ${BOOKING.dropoff}<br><b>מספר הזמנה חדש:</b> <span class="ltr">${BOOKING.number}</span></p>`;grid.appendChild(card);}
 }
-function updateDisplay(v){
- const page=document.getElementById('page-car');if(!page)return;
- const first=page.querySelector('.grid .card');
- if(first){const p=first.querySelector('p');if(p){const lines=p.innerHTML.split('<br>');lines[0]=`<b id="currentCarModel">${esc(v.model)}</b>`;p.innerHTML=lines.join('<br>');}}
- const status=document.getElementById('currentCarDetails');if(status)status.innerHTML=`<b>${esc(v.model)}</b><br><span class="muted">מנוע: ${esc(v.engine)} · ${fuelLabel(v.fuel)}</span>`;
- syncFuel(v.fuel);
-}
-function build(){
- const page=document.getElementById('page-car');if(!page)return;
- updateBookingDisplay();
- if(document.getElementById('carEditorCard')){updateDisplay(load());return}
- const firstGrid=page.querySelector('.grid');if(!firstGrid)return;
- const v=load();
- const card=document.createElement('div');card.id='carEditorCard';card.className='card';card.style.marginTop='14px';
- card.innerHTML=`<h2 style="margin-top:0">✏️ הרכב שקיבלתי בפועל</h2><div id="currentCarDetails" class="ok"></div><div class="controls"><label class="field"><span>יצרן / דגם</span><input id="actualCarModel" type="text" value="${esc(v.model)}" placeholder="למשל: Skoda Karoq"></label><label class="field"><span>מנוע / נפח</span><input id="actualCarEngine" type="text" value="${esc(v.engine)}" placeholder="למשל: 2.0 TDI 150hp"></label><label class="field"><span>סוג הנעה / דלק</span><select id="actualCarFuel"><option value="petrol">בנזין</option><option value="diesel">דיזל</option><option value="hybrid">היברידי</option><option value="phev">פלאג־אין היברידי</option></select></label></div><button class="btn" type="button" id="saveCarDetails">שמור פרטי רכב</button><span id="carSaveStatus" class="muted" style="margin-right:10px"></span><p class="muted">הפרטים נשמרים במכשיר. שינוי סוג הדלק יעדכן גם את חישוב עלות הדלק בעמוד הרכב.</p>`;
- firstGrid.insertAdjacentElement('afterend',card);
- document.getElementById('actualCarFuel').value=v.fuel;
- document.getElementById('saveCarDetails').addEventListener('click',()=>{
-  const nv={model:document.getElementById('actualCarModel').value.trim()||defaults.model,engine:document.getElementById('actualCarEngine').value.trim()||'לא ידוע',fuel:document.getElementById('actualCarFuel').value};
-  save(nv);updateDisplay(nv);const st=document.getElementById('carSaveStatus');st.textContent='✅ נשמר';setTimeout(()=>st.textContent='',1800);
- });
- updateDisplay(v);
-}
+function updateDisplay(v){const page=document.getElementById('page-car');if(!page)return;const first=page.querySelector('.grid .card');if(first){const p=first.querySelector('p');if(p){const lines=p.innerHTML.split('<br>');lines[0]=`<b id="currentCarModel">${esc(v.model)}</b>`;p.innerHTML=lines.join('<br>');}}const status=document.getElementById('currentCarDetails');if(status)status.innerHTML=`<b>${esc(v.model)}</b><br><span class="muted">מנוע: ${esc(v.engine)} · ${fuelLabel(v.fuel)}</span>`;syncFuel(v.fuel);}
+function build(){const page=document.getElementById('page-car');if(!page)return;updateBookingDisplay();if(document.getElementById('carEditorCard')){updateDisplay(load());return}const firstGrid=page.querySelector('.grid');if(!firstGrid)return;const v=load();const card=document.createElement('div');card.id='carEditorCard';card.className='card';card.style.marginTop='14px';card.innerHTML=`<h2 style="margin-top:0">✏️ הרכב שקיבלתי בפועל</h2><div id="currentCarDetails" class="ok"></div><div class="controls"><label class="field"><span>יצרן / דגם</span><input id="actualCarModel" type="text" value="${esc(v.model)}" placeholder="למשל: Skoda Karoq"></label><label class="field"><span>מנוע / נפח</span><input id="actualCarEngine" type="text" value="${esc(v.engine)}" placeholder="למשל: 2.0 TDI 150hp"></label><label class="field"><span>סוג הנעה / דלק</span><select id="actualCarFuel"><option value="petrol">בנזין</option><option value="diesel">דיזל</option><option value="hybrid">היברידי</option><option value="phev">פלאג־אין היברידי</option></select></label></div><button class="btn" type="button" id="saveCarDetails">שמור פרטי רכב</button><span id="carSaveStatus" class="muted" style="margin-right:10px"></span><p class="muted">הפרטים נשמרים במכשיר. שינוי סוג הדלק יעדכן גם את חישוב עלות הדלק בעמוד הרכב.</p>`;firstGrid.insertAdjacentElement('afterend',card);document.getElementById('actualCarFuel').value=v.fuel;document.getElementById('saveCarDetails').addEventListener('click',()=>{const nv={model:document.getElementById('actualCarModel').value.trim()||defaults.model,engine:document.getElementById('actualCarEngine').value.trim()||'לא ידוע',fuel:document.getElementById('actualCarFuel').value};save(nv);updateDisplay(nv);const st=document.getElementById('carSaveStatus');st.textContent='✅ נשמר';setTimeout(()=>st.textContent='',1800);});updateDisplay(v);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();
 document.addEventListener('click',e=>{const b=e.target.closest('.nav button[data-page="car"]');if(b)setTimeout(()=>{build();updateBookingDisplay();updateDisplay(load())},0)},true);
 })();
