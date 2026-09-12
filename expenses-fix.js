@@ -1,7 +1,12 @@
 (()=>{
 const KEY='romania-manual-expenses';
+const PREPAID=[
+ {amount:2000,currency:'RON',description:'הזמנת מט״ח לנסיעה · 2,000 RON · הזמנה 625700676 · איסוף 18/09/2026',orderNumber:'625700676',createdAt:'2026-09-12T07:36:58Z'},
+ {amount:500,currency:'EUR',description:'הזמנת מט״ח לנסיעה · 500 EUR · הזמנה 625700681 · איסוף 18/09/2026',orderNumber:'625700681',createdAt:'2026-09-12T07:37:18Z'}
+];
 function get(){try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
 function save(v){try{localStorage.setItem(KEY,JSON.stringify(v));return true}catch(e){return false}}
+function seedPrepaid(){const a=get();let changed=false;PREPAID.forEach(x=>{if(!a.some(y=>y.orderNumber===x.orderNumber||String(y.description||'').includes(x.orderNumber))){a.push(x);changed=true}});if(changed)save(a)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function moneyOriginal(x){const sym=x.currency==='USD'?'$':x.currency==='EUR'?'€':x.currency==='ILS'?'₪':'';return `${sym}${Number(x.amount).toLocaleString('he-IL',{maximumFractionDigits:2})}${sym?'':' '+x.currency}`}
 function ilsFor(x){try{if(typeof toIls==='function'){const n=toIls(x.amount,x.currency);return Number.isFinite(n)&&n>0?'₪'+Math.round(n).toLocaleString('he-IL'):'ממתין לשער'}}catch(e){}return x.currency==='ILS'?'₪'+Math.round(Number(x.amount)).toLocaleString('he-IL'):'ממתין לשער'}
@@ -20,6 +25,7 @@ function add(){
  render();try{if(typeof renderSummary==='function')renderSummary()}catch(e){}
 }
 function install(){
+ seedPrepaid();
  const btn=document.getElementById('addExpenseBtn');
  if(btn&&!btn.dataset.expenseFix){btn.dataset.expenseFix='1';btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();add()},true)}
  render();
