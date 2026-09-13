@@ -4,13 +4,19 @@ let calcNodes=null;
 function injectStyle(){if(document.getElementById('homeToolsStyle'))return;const s=document.createElement('style');s.id='homeToolsStyle';s.textContent=`
 #homeTools{margin-top:18px}#homeCalculatorHost{margin-top:10px}.home-quick-grid{grid-template-columns:repeat(7,minmax(0,1fr))!important}.home-quick[data-translate]{border-color:var(--trans-gold,#B68A4C)!important}.home-quick[data-translate] span{font-size:1.25rem}
 #homeCalculatorHost>.card{margin:0!important}#homeCalculatorHost>h1{display:none!important}#page-calculator{display:none!important}
-@media(max-width:850px){.home-quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}#homeTools .calc-grid{grid-template-columns:1fr!important}#homeTools .swap{justify-self:center;transform:rotate(90deg)}#homeTools .rate-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:520px){.home-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#homeTools .rate-cards{grid-template-columns:1fr!important}}
+/* Quick actions use the same app-like tiles on desktop and mobile */
+#page-home .dash-actions{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(92px,1fr))!important;gap:10px!important}
+#page-home .dash-actions button{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;min-height:88px!important;padding:11px 7px!important;border:1px solid var(--line,#DED5C9)!important;border-radius:16px!important;background:var(--soft,#F1E8DE)!important;color:var(--text,#1F2A24)!important;font-weight:900!important;font-size:.86rem!important;cursor:pointer!important;box-shadow:none!important}
+#page-home .dash-actions button span{display:block!important;font-size:1.5rem!important;line-height:1!important;margin:0!important}
+:root[data-theme="dark"] #page-home .dash-actions button{background:var(--soft,#2A322B)!important;color:var(--text,#F3EFE7)!important;border-color:var(--line,#3D493F)!important}
+@media(max-width:850px){.home-quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}#page-home .dash-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important}#page-home .dash-actions button{min-height:82px!important}#homeTools .calc-grid{grid-template-columns:1fr!important}#homeTools .swap{justify-self:center;transform:rotate(90deg)}#homeTools .rate-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:520px){.home-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#page-home .dash-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}#homeTools .rate-cards{grid-template-columns:1fr!important}}
 `;document.head.appendChild(s)}
 function navTo(page){const b=document.querySelector(`header .nav button[data-page="${page}"]`);if(b){b.click();return}document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById('page-'+page)?.classList.add('on');window.scrollTo({top:0,behavior:'smooth'})}
 function removeFromMenus(){
- document.querySelectorAll('header .nav button').forEach(b=>{const t=(b.textContent||'').trim(),p=b.dataset.page||'';if(['calculator','checkin','todo'].includes(p)||/תרגום/.test(t))b.remove()});
- document.querySelectorAll('#moreSheet button').forEach(b=>{const t=(b.textContent||'').trim(),p=b.dataset.go||'';if(['calculator','checkin','todo'].includes(p)||/תרגום/.test(t))b.remove()});
+ const quickPages=new Set(['trip','hotels','car','emergency','checkin','todo','calculator']);
+ document.querySelectorAll('header .nav button').forEach(b=>{const t=(b.textContent||'').trim(),p=b.dataset.page||'';if(quickPages.has(p)||/תרגום/.test(t))b.remove()});
+ document.querySelectorAll('#moreSheet button').forEach(b=>{const t=(b.textContent||'').trim(),p=b.dataset.go||'';if(quickPages.has(p)||/תרגום/.test(t))b.remove()});
  document.querySelectorAll('.page').forEach(p=>{if(/translate|translation/i.test(p.id||''))p.remove()});
 }
 function openGoogleTranslate(){
