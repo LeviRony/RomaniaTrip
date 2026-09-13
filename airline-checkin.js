@@ -18,11 +18,11 @@ function build(){if(document.getElementById('page-checkin'))return;const main=do
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="ciSave" type="button">💾 שמור במכשיר</button><button class="danger-btn" id="ciClear" type="button">נקה פרטים</button></div></div>
 
 <div class="grid" style="margin-top:14px;grid-template-columns:1fr 1fr">
-<div class="card"><h2>הלוך · LY9491</h2><p><b>19.9.2026 · 00:20</b><br>TLV → OTP · נחיתה 03:05</p><p>משווקת ע״י EL AL · מופעלת ע״י TAROM</p>
-<div class="card" style="margin:10px 0;padding:12px"><h3 style="margin-top:0">🧳 כבודה</h3><div class="facts"><div><b>רינת</b><br>מזוודה לבטן: <b>1PC</b></div><div><b>טרולי</b><br>לא מופיע במידע שיש לנו מהכרטיס</div></div><div class="muted" style="margin-top:8px">1PC הוא הסימון שמופיע בכרטיס ההלוך.</div></div>
+<div class="card"><h2>הלוך · LY9491</h2><p><b>19.9.2026 · 00:20</b><br>TLV → OTP · נחיתה 03:05</p><p>כרטיסי <b>EL AL Classic</b> · משווקת ע״י EL AL · מופעלת ע״י TAROM</p>
+<div class="card" style="margin:10px 0;padding:12px"><h3 style="margin-top:0">🧳 כבודה · Classic</h3><div class="facts"><div><b>כבודת יד / טרולי</b><br><b>1 יחידה עד 8 ק״ג</b> לכל כרטיס</div><div><b>מזוודה לבטן</b><br><b>1 × עד 23 ק״ג</b> לכל כרטיס</div></div><div class="muted" style="margin-top:8px">בכרטיס ההלוך שכבר בדקנו מופיע גם הסימון 1PC. מאחר שהטיסה מופעלת ע״י TAROM, במקרה של הבדל בין כללי החברות יש לפעול לפי הכרטיס/החברה המפעילה.</div></div>
 <div class="ok">TAROM מציינת שצ׳ק-אין אונליין זמין החל מ־36 שעות לפני הטיסה.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" target="_blank" rel="noopener" href="${TAROM}">פתח TAROM Check-in</a><a class="btn" target="_blank" rel="noopener" href="${ELAL}">פתח EL AL Check-in</a></div></div>
-<div class="card"><h2>חזור · LY574</h2><p><b>30.9.2026 · 10:25</b><br>OTP → TLV · נחיתה 12:55</p>
-<div class="card" style="margin:10px 0;padding:12px"><h3 style="margin-top:0">🧳 כבודה</h3><div class="facts"><div><b>רינת</b><br>מזוודה לבטן: <b>23 ק״ג</b> ✅ נרכשה</div><div><b>טרולי</b><br>לא מופיע במידע שיש לנו כרגע</div></div></div>
+<div class="card"><h2>חזור · LY574</h2><p><b>30.9.2026 · 10:25</b><br>OTP → TLV · נחיתה 12:55</p><p>כרטיסי <b>EL AL Lite</b></p>
+<div class="card" style="margin:10px 0;padding:12px"><h3 style="margin-top:0">🧳 כבודה · Lite</h3><div class="facts"><div><b>כבודת יד / טרולי</b><br><b>1 יחידה עד 8 ק״ג</b> לכל כרטיס</div><div><b>מזוודה לבטן</b><br><b>לא כלולה</b> בכרטיס Lite</div><div><b>רינת</b><br>מזוודה לבטן <b>1 × 23 ק״ג</b> ✅ נרכשה בנפרד</div></div></div>
 <p>השתמש באותו קוד הזמנה אם הוא מופיע גם בכרטיס החזור.</p><a class="btn" target="_blank" rel="noopener" href="${ELAL}">פתח EL AL Check-in</a></div>
 </div>
 <div class="card" style="margin-top:14px"><h2>הפרטים שלי</h2><div id="ciSummary" class="facts"></div></div>`;
