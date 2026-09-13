@@ -20,9 +20,14 @@ function injectStyle(){if(document.getElementById('romania-theme-style'))return;
 :root[data-theme="dark"] .facts div,:root[data-theme="dark"] .metric,:root[data-theme="dark"] .summary-row:not(.total),:root[data-theme="dark"] .expense-item,:root[data-theme="dark"] .summary-note{background:var(--soft)!important;color:var(--text)!important}
 :root[data-theme="dark"] .rule{background:#3b3218!important;color:#fff0bd!important;border-right-color:#c99a24!important}
 :root[data-theme="dark"] .rule *{color:#fff0bd!important}
-:root[data-theme="dark"] .home-hero{background:linear-gradient(135deg,#0b5b6d,#0f819b)!important;color:#fff!important}
+.home-hero{background:linear-gradient(135deg,#075f78,#0b8eaa)!important;color:#fff!important;box-shadow:0 8px 24px #0d6f8824}
+.home-hero #homeTitle,.home-hero #homeSub{color:#fff!important}
+.today-badge{background:#e8f8fc!important;color:#075d70!important;border:1px solid #b8e7f0!important;box-shadow:0 2px 8px #063f4c24}
+.home-kpi{background:#ffffff1c!important;border-color:#ffffff5c!important;color:#fff!important}
+.home-kpi span,.home-kpi b{color:#fff!important}
+:root[data-theme="dark"] .home-hero{background:linear-gradient(135deg,#073e4c,#086d82)!important;color:#fff!important;box-shadow:0 8px 26px #0007}
 :root[data-theme="dark"] .home-kpi{background:#ffffff12!important;border-color:#ffffff35!important;color:#fff!important}
-:root[data-theme="dark"] .today-badge{background:#dff5fa!important;color:#07576a!important}
+:root[data-theme="dark"] .today-badge{background:#123946!important;color:#9fe8f5!important;border-color:#2b6d7c!important;box-shadow:none!important}
 :root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea,:root[data-theme="dark"] option,:root[data-theme="dark"] [data-remind-select],:root[data-theme="dark"] #page-emergency input{background:#0e2027!important;color:var(--text)!important;border-color:var(--line)!important}
 :root[data-theme="dark"] .warn{background:#4a3b12!important;color:#fff0bd!important;border-color:#a97c14!important}
 :root[data-theme="dark"] .warn *{color:#fff0bd!important}
