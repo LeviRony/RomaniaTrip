@@ -1,7 +1,6 @@
 (()=>{
 'use strict';
 function inject(){if(document.getElementById('transylvaniaTheme'))return;const s=document.createElement('style');s.id='transylvaniaTheme';s.textContent=`
-/* Transylvania palette — intentionally does not recolor the top header/navigation */
 :root[data-theme="light"]{--bg:#F4F1EC;--card:#FFFCF7;--text:#1F2A24;--muted:#6F716B;--line:#DED5C9;--soft:#F1E8DE;--p:#31473A;--trans-accent:#743B46;--trans-gold:#B68A4C;color-scheme:light}
 :root[data-theme="light"] body,:root[data-theme="light"] main,:root[data-theme="light"] .wrap,:root[data-theme="light"] .page,:root[data-theme="light"] section{background:var(--bg)!important;color:var(--text)!important}
 :root[data-theme="light"] .card,:root[data-theme="light"] .edit-day,:root[data-theme="light"] .attraction-row,:root[data-theme="light"] .metric,:root[data-theme="light"] .facts div,:root[data-theme="light"] .summary-row,:root[data-theme="light"] .expense-item,:root[data-theme="light"] .summary-note,:root[data-theme="light"] .bike-options,:root[data-theme="light"] .bike-option,:root[data-theme="light"] .home-item,:root[data-theme="light"] .emergency-card,:root[data-theme="light"] .home-smart-card,:root[data-theme="light"] .home-quick{background:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important}
@@ -33,7 +32,46 @@ function inject(){if(document.getElementById('transylvaniaTheme'))return;const s
 :root[data-theme="dark"] #moreSheet .more-grid button{background:var(--soft)!important;color:var(--text)!important;border-color:var(--line)!important}
 :root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea,:root[data-theme="dark"] option{background:#202821!important;color:var(--text)!important;border-color:var(--line)!important}
 #homeSmartPanel.pretrip-clean{grid-template-columns:1fr!important}
-/* Preserve existing header, menu and home hero colors exactly as defined by the original theme */
+
+/* Transylvania navigation */
+:root[data-theme="light"] header{background:#31473A!important;color:#fff!important}
+:root[data-theme="light"] header .nav button{background:#ffffff12!important;color:#FFFDF7!important;border-color:#ffffff42!important}
+:root[data-theme="light"] header .nav button.on{background:#FFF8EF!important;color:#743B46!important;border-color:#FFF8EF!important}
+:root[data-theme="dark"] header{background:#202821!important;color:#F3EFE7!important}
+:root[data-theme="dark"] header .nav button{background:#ffffff0d!important;color:#F3EFE7!important;border-color:#ffffff2e!important}
+:root[data-theme="dark"] header .nav button.on{background:#342A2B!important;color:#E5A1AC!important;border-color:#65464C!important}
+
+/* Responsive: never require horizontal page scrolling */
+html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+body *{max-width:100%;min-width:0}
+.wrap,main.wrap,.page,section,.card,.home-grid,.grid,.facts,.metrics,.controls,.rate-cards,.summary-row,.expense-form,.expense-item,.calc-grid,.route-editor,.edit-day,#homeSmartPanel{min-width:0!important;max-width:100%!important}
+img,svg,canvas,video,iframe{max-width:100%!important;height:auto}
+#map{max-width:100%!important}
+pre,code,.ltr,.phone{max-width:100%!important;overflow-wrap:anywhere}
+
+@media(max-width:850px){
+ header .head{width:100%!important;max-width:100%!important;grid-template-columns:1fr!important;padding:7px 8px!important;overflow:visible!important}
+ .brand-row{width:100%!important}
+ header .brand{max-width:100%!important;white-space:normal!important}
+ header .nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;width:100%!important;max-width:100%!important;overflow:visible!important;gap:5px!important;padding:2px 0!important}
+ header .nav button,#themeToggleBtn{width:100%!important;max-width:none!important;min-width:0!important;flex:none!important;height:auto!important;min-height:34px!important;padding:6px 4px!important;font-size:11px!important;line-height:1.15!important;white-space:normal!important;text-align:center!important}
+ #themeToggleBtn{display:flex!important;align-items:center!important;justify-content:center!important}
+ .wrap{padding-left:10px!important;padding-right:10px!important;width:100%!important}
+ .grid,.metrics,.controls,.facts,.rate-cards,.home-grid,.calc-grid,.summary-row,.expense-form,.expense-item{grid-template-columns:1fr!important;width:100%!important}
+ .card{width:100%!important;padding:13px!important}
+ .home-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .more-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .tabs{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;overflow:visible!important;width:100%!important}
+ .tab{min-width:0!important;white-space:normal!important;padding:8px 4px!important;font-size:12px!important}
+ .hotel-title{display:grid!important;grid-template-columns:1fr!important}
+ .price{font-size:1.3rem!important;overflow-wrap:anywhere}
+}
+
+@media(max-width:430px){
+ header .nav{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .tabs{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .home-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
 `;
 document.head.appendChild(s)}
 function bucharestDate(){try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bucharest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}catch(e){return''}}
