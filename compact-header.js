@@ -1,0 +1,21 @@
+(()=>{
+'use strict';
+const labels={home:'🏠 ראשי',trip:'🧭 מסלול',hotels:'🏨 מלונות',car:'🚙 רכב',calculator:'🧮 מחשבון',summary:'💰 סיכום',todo:'✅ משימות',emergency:'🆘 חשוב',checkin:'✈️ צ׳ק־אין'};
+function injectStyle(){if(document.getElementById('compactHeaderStyle'))return;const s=document.createElement('style');s.id='compactHeaderStyle';s.textContent=`
+header .head{max-width:1180px!important;padding:6px 10px!important;gap:8px!important;display:grid!important;grid-template-columns:auto 1fr!important;align-items:center!important}
+header .brand{font-size:.9rem!important;line-height:1.15!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;max-width:210px!important}
+header .nav{display:flex!important;flex-wrap:nowrap!important;gap:5px!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important;align-items:center!important;padding:1px 0!important}
+header .nav::-webkit-scrollbar{display:none!important}
+header .nav button{flex:0 0 auto!important;min-width:0!important;padding:6px 9px!important;border-radius:8px!important;font-size:13px!important;line-height:1.1!important;white-space:nowrap!important;height:32px!important}
+#themeToggleBtn{width:32px!important;height:32px!important;min-width:32px!important;max-width:32px!important;flex:0 0 32px!important;font-size:15px!important;border-radius:8px!important}
+#connectionMini{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;white-space:nowrap;opacity:.95;margin-inline-start:6px}
+#connectionMini .dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:#2ecc71;box-shadow:0 0 0 2px #ffffff33}
+#connectionMini.offline .dot{background:#ffb020}
+@media(max-width:850px){header .head{display:grid!important;grid-template-columns:1fr!important;padding:5px 8px!important;gap:4px!important}.brand-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}.brand{max-width:68vw!important;font-size:.82rem!important}header .nav button{font-size:12px!important;padding:5px 8px!important;height:30px!important}#themeToggleBtn{width:30px!important;height:30px!important;min-width:30px!important;max-width:30px!important;flex-basis:30px!important}}
+`;document.head.appendChild(s)}
+function shortenButtons(){document.querySelectorAll('.nav button[data-page]').forEach(b=>{const p=b.dataset.page;if(labels[p])b.textContent=labels[p]})}
+function hideOldStatus(){document.querySelectorAll('header *').forEach(el=>{if(el.id==='connectionMini'||el.closest('#connectionMini'))return;const t=(el.textContent||'').trim();if((/אונליין|אופליין|online|offline/i).test(t)&&!el.querySelector('button')){el.style.display='none'}})}
+function buildStatus(){const head=document.querySelector('header .head');const brand=document.querySelector('header .brand');if(!head||!brand)return;let row=document.querySelector('.brand-row');if(!row){row=document.createElement('div');row.className='brand-row';brand.parentNode.insertBefore(row,brand);row.appendChild(brand)}let st=document.getElementById('connectionMini');if(!st){st=document.createElement('span');st.id='connectionMini';row.appendChild(st)}const update=()=>{const on=navigator.onLine;st.classList.toggle('offline',!on);st.innerHTML=`<span class="dot"></span><span>${on?'אונליין':'אופליין'}</span>`;st.title=on?'מחובר לאינטרנט':'אין חיבור לאינטרנט'};update();window.addEventListener('online',update);window.addEventListener('offline',update)}
+function init(){injectStyle();shortenButtons();buildStatus();hideOldStatus();setTimeout(()=>{shortenButtons();buildStatus();hideOldStatus()},500)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
