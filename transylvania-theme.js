@@ -32,8 +32,12 @@ function inject(){if(document.getElementById('transylvaniaTheme'))return;const s
 :root[data-theme="dark"] #moreSheet .sheet{background:var(--card)!important;color:var(--text)!important}
 :root[data-theme="dark"] #moreSheet .more-grid button{background:var(--soft)!important;color:var(--text)!important;border-color:var(--line)!important}
 :root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea,:root[data-theme="dark"] option{background:#202821!important;color:var(--text)!important;border-color:var(--line)!important}
+#homeSmartPanel.pretrip-clean{grid-template-columns:1fr!important}
 /* Preserve existing header, menu and home hero colors exactly as defined by the original theme */
 `;
 document.head.appendChild(s)}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject);else inject();
+function bucharestDate(){try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bucharest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}catch(e){return''}}
+function cleanPreTripLodging(){if(bucharestDate()>='2026-09-19')return;const panel=document.getElementById('homeSmartPanel');if(!panel)return;for(const card of [...panel.querySelectorAll('.home-smart-card')]){const h=card.querySelector('h3')?.textContent||'';if(h.includes('לינה'))card.remove()}panel.classList.add('pretrip-clean')}
+function init(){inject();cleanPreTripLodging();setTimeout(cleanPreTripLodging,600);setTimeout(cleanPreTripLodging,1600);new MutationObserver(cleanPreTripLodging).observe(document.body,{childList:true,subtree:true})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
