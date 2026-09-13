@@ -1,0 +1,42 @@
+(()=>{
+'use strict';
+const TZ='Europe/Bucharest';
+const CACHE_KEY='romania-home-weather-cache-v1';
+const MAX_DAYS=5;
+const FIXED_RE=/(hotel|swissôtel|swissotel|novotel|orizont|otp|tlv|klass|airport|מלון|צ׳ק|צ'ק|חזרה|יציאה)/i;
+const places=[
+ {re:/bâlea|balea/i,name:'אגם בלאה',lat:45.6048,lon:24.6177},
+ {re:/vidraru/i,name:'וידרארו',lat:45.366,lon:24.63},
+ {re:/therme/i,name:'בוקרשט',lat:44.6062,lon:26.0804},
+ {re:/afi|old town|mihai|militari|jumbo|novotel|bucharest/i,name:'בוקרשט',lat:44.4371,lon:26.0971},
+ {re:/peleș|peles|sinaia|ghica|sania/i,name:'סינאיה',lat:45.3525,lon:25.5518},
+ {re:/slănic|slanic|salina/i,name:'סלאניק פראחובה',lat:45.2341,lon:25.9394},
+ {re:/piața|piata|paradisul|aventura|brașov|brasov/i,name:'בראשוב',lat:45.6427,lon:25.5887},
+ {re:/poiana|swissôtel|swissotel/i,name:'פויאנה בראשוב',lat:45.586,lon:25.547},
+ {re:/predeal|orizont/i,name:'פרדיאל',lat:45.503,lon:25.578},
+ {re:/otp|otopeni|klass/i,name:'אוטופן / בוקרשט',lat:44.5711,lon:26.085}
+];
+function localDate(){const p=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const g=t=>Number(p.find(x=>x.type===t)?.value||0);return{y:g('year'),m:g('month'),d:g('day')}}
+function isoDate(day){return `2026-09-${String(day).padStart(2,'0')}`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function placeForStop(s){const text=`${s?.[0]||''} ${s?.[4]||''}`;for(const p of places)if(p.re.test(text))return p;const lat=Number(s?.[1]),lon=Number(s?.[2]);return Number.isFinite(lat)&&Number.isFinite(lon)?{name:s?.[0]||'יעד',lat,lon}:null}
+function pickPlace(day){const stops=Array.isArray(day?.s)?day.s:[];const balea=stops.find(s=>/bâlea|balea/i.test(`${s?.[0]||''} ${s?.[4]||''}`));if(balea)return placeForStop(balea);const candidates=stops.filter(s=>!FIXED_RE.test(`${s?.[0]||''} ${s?.[4]||''}`));for(let i=candidates.length-1;i>=0;i--){const p=placeForStop(candidates[i]);if(p)return p}for(let i=stops.length-1;i>=0;i--){const p=placeForStop(stops[i]);if(p)return p}return null}
+function forecastDays(){const d=(typeof D!=='undefined'&&Array.isArray(D))?D:[];if(!d.length)return[];const x=localDate();let start=19;if(x.y===2026&&x.m===9&&x.d>=19&&x.d<=30)start=x.d;else if(x.y===2026&&x.m===9&&x.d===18)start=19;else if(x.y>2026||(x.y===2026&&(x.m>9||(x.m===9&&x.d>30))))return[];const out=[];for(let day=start;day<=30&&out.length<MAX_DAYS;day++){const info=d[day-19],place=pickPlace(info);if(place)out.push({day,date:isoDate(day),label:day===start&&x.y===2026&&x.m===9&&x.d===day?'היום':day===start+1&&x.y===2026&&x.m===9&&x.d===start?'מחר':`${day}.9`,place})}return out}
+function icon(code){if(code===0)return'☀️';if(code<=2)return'🌤️';if(code===3)return'☁️';if([45,48].includes(code))return'🌫️';if(code>=51&&code<=67)return'🌧️';if(code>=71&&code<=77)return'❄️';if(code>=80&&code<=82)return'🌦️';if(code>=85&&code<=86)return'🌨️';if(code>=95)return'⛈️';return'🌡️'}
+function desc(code){if(code===0)return'בהיר';if(code<=2)return'מעונן חלקית';if(code===3)return'מעונן';if([45,48].includes(code))return'ערפל';if(code>=51&&code<=67)return'גשם';if(code>=71&&code<=77)return'שלג';if(code>=80&&code<=82)return'ממטרים';if(code>=85&&code<=86)return'ממטרי שלג';if(code>=95)return'סופות רעמים';return'תחזית'}
+function injectStyle(){if(document.getElementById('homeWeatherStyle'))return;const s=document.createElement('style');s.id='homeWeatherStyle';s.textContent=`
+#homeWeather{display:grid;gap:10px}.home-weather-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}.weather-day{min-width:0;border:1px solid var(--line,#DED5C9);border-radius:15px;padding:12px;background:var(--card,#FFFCF7)}.weather-day.today{border-color:var(--trans-gold,#B68A4C);box-shadow:inset 0 0 0 1px var(--trans-gold,#B68A4C)}.weather-day .w-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.weather-day .w-label{font-weight:900}.weather-day .w-icon{font-size:1.65rem}.weather-day .w-place{font-weight:900;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.weather-day .w-temp{font-size:1.25rem;font-weight:900;margin-top:4px}.weather-day .w-meta{font-size:.78rem;color:var(--muted,#6F716B);margin-top:3px}.weather-loading{padding:16px;border-radius:14px;background:var(--soft,#F1E8DE);color:var(--muted,#6F716B)}
+@media(max-width:850px){.home-weather-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.weather-day:first-child{grid-column:1/-1}.weather-day{padding:11px}}
+@media(max-width:430px){.home-weather-grid{grid-template-columns:1fr 1fr}.weather-day .w-temp{font-size:1.1rem}}
+`;document.head.appendChild(s)}
+function ensureSection(){const page=document.getElementById('page-home'),dash=document.getElementById('realDashboard');if(!page||!dash)return null;let sec=document.getElementById('homeWeather');if(sec)return sec;sec=document.createElement('section');sec.id='homeWeather';sec.className='dash-card';sec.innerHTML='<div class="dash-section-title"><h2>🌦️ מזג אוויר לפי המסלול</h2><small>מתעדכן לפי היעד המתוכנן בכל יום</small></div><div id="homeWeatherBody" class="weather-loading">טוען תחזית…</div>';const days=dash.querySelector('.dash-days')?.closest('.dash-card');dash.insertBefore(sec,days||null);return sec}
+function cacheGet(k){try{const all=JSON.parse(localStorage.getItem(CACHE_KEY)||'{}'),v=all[k];return v&&Date.now()-v.t<1800000?v.d:null}catch(e){return null}}
+function cachePut(k,d){try{const all=JSON.parse(localStorage.getItem(CACHE_KEY)||'{}');all[k]={t:Date.now(),d};localStorage.setItem(CACHE_KEY,JSON.stringify(all))}catch(e){}}
+async function loadOne(item){const key=`${item.date}|${item.place.lat}|${item.place.lon}`,cached=cacheGet(key);if(cached)return cached;const u=`https://api.open-meteo.com/v1/forecast?latitude=${item.place.lat}&longitude=${item.place.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe%2FBucharest&start_date=${item.date}&end_date=${item.date}`;const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('weather');const j=await r.json(),d=j.daily;if(!d?.time?.length)throw new Error('no forecast');const out={code:Number(d.weather_code?.[0]),max:Math.round(Number(d.temperature_2m_max?.[0])),min:Math.round(Number(d.temperature_2m_min?.[0])),rain:Math.round(Number(d.precipitation_probability_max?.[0]||0)),wind:Math.round(Number(d.wind_speed_10m_max?.[0]||0))};cachePut(key,out);return out}
+async function render(){injectStyle();const sec=ensureSection();if(!sec)return;const body=sec.querySelector('#homeWeatherBody'),days=forecastDays();if(!days.length){body.className='weather-loading';body.textContent='אין כרגע ימים מתוכננים להצגת תחזית.';return}body.className='home-weather-grid';body.innerHTML=days.map((x,i)=>`<div class="weather-day${i===0&&x.label==='היום'?' today':''}" data-w="${i}"><div class="w-top"><span class="w-label">${esc(x.label)}</span><span class="w-icon">…</span></div><div class="w-place">${esc(x.place.name)}</div><div class="w-temp">טוען…</div><div class="w-meta">${x.date.split('-').reverse().slice(0,2).join('.')}</div></div>`).join('');await Promise.all(days.map(async(x,i)=>{const el=body.querySelector(`[data-w="${i}"]`);if(!el)return;try{const w=await loadOne(x);el.querySelector('.w-icon').textContent=icon(w.code);el.querySelector('.w-temp').textContent=`${w.max}° / ${w.min}°`;el.querySelector('.w-meta').textContent=`${desc(w.code)} · גשם ${w.rain}% · רוח ${w.wind} קמ״ש`}catch(e){el.querySelector('.w-icon').textContent='—';el.querySelector('.w-temp').textContent='אין תחזית עדיין';el.querySelector('.w-meta').textContent=x.date.split('-').reverse().slice(0,2).join('.')}}))}
+function schedule(){[150,650,1500,2400].forEach(t=>setTimeout(render,t))}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule);else schedule();
+document.addEventListener('click',e=>{if(e.target.closest('header .nav button[data-page="home"]'))setTimeout(render,250)},true);
+window.addEventListener('storage',e=>{if(e.key==='romania-itinerary-v3')setTimeout(render,150)});
+new MutationObserver(()=>{if(document.getElementById('page-home')&&!document.getElementById('homeWeather'))setTimeout(render,80)}).observe(document.documentElement,{childList:true,subtree:true});
+})();
