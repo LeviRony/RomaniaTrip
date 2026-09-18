@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const TZ='Europe/Bucharest';
-const START=new Date('2026-09-18T18:00:00+03:00');
+const START=new Date('2026-09-19T00:20:00+03:00');
 const END=new Date('2026-09-30T12:55:00+03:00');
 const hotels=[
  {from:19,to:22,name:'Hotel Orizont Predeal',place:'Predeal',phone:'+40734458554',q:'Hotel Orizont Predeal Romania'},
@@ -16,7 +16,7 @@ function currentHotel(x){return x.y===2026&&x.m===9?hotels.find(h=>x.d>=h.from&&
 function todayDay(x){const a=(typeof D!=='undefined'&&Array.isArray(D))?D:null;return x.y===2026&&x.m===9&&x.d>=19&&x.d<=30?a?.[x.d-19]:null}
 function mins(t){const m=String(t||'').match(/(\d{1,2}):(\d{2})/);return m?+m[1]*60 + +m[2]:null}
 function nextStop(x){if(x.y===2026&&x.m===9&&x.d<=18)return{time:'18.9 בערב',place:'נתב״ג Terminal 3',desc:'דרך הזוהר 17, פתח תקווה · לקראת LY9491',q:'Ben Gurion Airport Terminal 3',via:'הזוהר 17 פתח תקווה'};const day=todayDay(x);if(!day?.s)return null;const now=x.h*60+x.min;for(const s of day.s){const mm=mins(s?.[3]);if(s?.[0]&&(mm===null||mm>=now-20))return{time:s?.[3]||'',place:s[0],desc:s?.[4]||'',q:s[0]}}return day.s.length?{time:day.s.at(-1)?.[3]||'',place:day.s.at(-1)?.[0]||'',desc:day.s.at(-1)?.[4]||'',q:day.s.at(-1)?.[0]||''}:null}
-function tripState(x){const now=new Date();if(now<START){const ms=START-now,total=Math.max(0,Math.floor(ms/1000)),days=Math.floor(total/86400),hours=Math.floor((total%86400)/3600),minutes=Math.floor((total%3600)/60),seconds=total%60;return{eyebrow:'הטיול מתקרב',title:`${days} ימים · ${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`,sub:'ספירה לאחור עד היציאה לנתב״ג · 18.9 18:00',pct:0}}if(now>END)return{eyebrow:'הטיול הסתיים',title:'חזרנו הביתה',sub:'30.9.2026',pct:100};const pct=Math.max(0,Math.min(100,Math.round((now-START)/(END-START)*100)));return{eyebrow:'אנחנו ברומניה',title:`יום ${Math.max(1,x.d-18)} מתוך 12`,sub:`${x.d}.9.2026`,pct}}
+function tripState(x){const now=new Date();if(now<START){const ms=START-now,total=Math.max(0,Math.floor(ms/1000)),days=Math.floor(total/86400),hours=Math.floor((total%86400)/3600),minutes=Math.floor((total%3600)/60),seconds=total%60;return{eyebrow:'הטיול מתקרב',title:`${days} ימים · ${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`,sub:'ספירה לאחור עד ההמראה · LY9491 · 19.9 00:20',pct:0}}if(now>END)return{eyebrow:'הטיול הסתיים',title:'חזרנו הביתה',sub:'30.9.2026',pct:100};const pct=Math.max(0,Math.min(100,Math.round((now-START)/(END-START)*100)));return{eyebrow:'אנחנו ברומניה',title:`יום ${Math.max(1,x.d-18)} מתוך 12`,sub:`${x.d}.9.2026`,pct}}
 function daysHtml(x){const a=(typeof D!=='undefined'&&Array.isArray(D))?D:[];return a.map((d,i)=>{const n=i+19, active=x.y===2026&&x.m===9&&x.d===n;return`<button class="dash-day${active?' active':''}" data-day="${i}"><b>${n}.9</b><span>${esc(d?.n||'')}</span></button>`}).join('')}
 function injectStyle(){if(document.getElementById('realDashboardStyle'))return;const s=document.createElement('style');s.id='realDashboardStyle';s.textContent=`
 #page-home.real-dashboard{padding-top:2px}.real-dashboard *{box-sizing:border-box}
