@@ -1,6 +1,6 @@
 (()=>{
 const KEY='romania-rental-car-details';
-const defaults={model:'CUPRA Terramar',engine:'Petrol Mild Hybrid (MHEV)',fuel:'hybrid'};
+const defaults={model:'CUPRA Terramar',engine:'1.5 eTSI Petrol Mild Hybrid (MHEV)',fuel:'hybrid'};
 const BOOKING={number:'OTP-2468182759765',pickup:'19.9.2026 · 04:00',dropoff:'30.9.2026 · 08:30',location:'OTP-AIR',flight:'LY9491',arrival:'OTP',cover:'Klass Total Cover'};
 function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
 function save(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
@@ -11,7 +11,7 @@ function updateBookingDisplay(){
  const page=document.getElementById('page-car');if(!page)return;
  const cards=[...page.querySelectorAll('.grid .card')];
  const first=cards[0];
- if(first){const p=first.querySelector('p');if(p)p.innerHTML=`<b>CUPRA Terramar</b> · IFAR<br>${BOOKING.pickup} → ${BOOKING.dropoff}<br>${BOOKING.cover}<br><span class="muted">הזמנה: <span class="ltr">${BOOKING.number}</span></span>`;}
+ if(first){const p=first.querySelector('p');if(p)p.innerHTML=`<b>CUPRA Terramar 1.5 eTSI Mild Hybrid</b> · IFAR<br>${BOOKING.pickup} → ${BOOKING.dropoff}<br>${BOOKING.cover}<br><span class="muted">הזמנה: <span class="ltr">${BOOKING.number}</span></span>`;}
  const supportCard=cards.find(c=>c.textContent.includes('+40 374 020 002')||c.textContent.includes('24/7'));
  if(supportCard){supportCard.innerHTML=`<b>📞 Klass Wagen · סיוע 24/7</b><p><a class="phone" dir="ltr" href="tel:+40374020002">+40 374 020 002</a></p><p>Visa/MasterCard פיזי על שם בעל החוזה.</p><div class="ok"><b>✈️ מספר הטיסה אצל Klass Wagen:</b> <span class="ltr"><b>${BOOKING.flight}</b></span><br><span class="muted">המספר כבר עודכן בהזמנה.</span></div>`;}
  const grid=page.querySelector('.grid');
