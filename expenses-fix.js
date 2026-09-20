@@ -4,7 +4,9 @@ const FIXED=[
  {key:'intl-license',amount:23,currency:'ILS',description:'רישיון נהיגה בין לאומי',displayOriginal:'₪23',createdAt:'2026-09-12T07:41:00Z'},
  {key:'esim-3',amount:61,currency:'ILS',description:'eSIM 3',displayOriginal:'$20.2',createdAt:'2026-09-12T07:41:00Z'},
  {key:'fx-eur-500',amount:1837,currency:'ILS',description:'500 אירו מטח · הזמנה 625700681',displayOriginal:'₪1,837',orderNumber:'625700681',createdAt:'2026-09-12T07:37:18Z'},
- {key:'fx-ron-2000',amount:1397,currency:'ILS',description:'2000 ליאו רומני מטח · הזמנה 625700676',displayOriginal:'₪1,397',orderNumber:'625700676',createdAt:'2026-09-12T07:36:58Z'}
+ {key:'fx-ron-2000',amount:1397,currency:'ILS',description:'2000 ליאו רומני מטח · הזמנה 625700676',displayOriginal:'₪1,397',orderNumber:'625700676',createdAt:'2026-09-12T07:36:58Z'},
+ {key:'mega-image-20260919',amount:18.46,currency:'RON',description:'Mega Image · 19.9',displayOriginal:'RON 18.46',createdAt:'2026-09-19T12:00:00+03:00'},
+ {key:'royal-tickets-20260920',amount:78.18,currency:'RON',description:'ROYAL TICKETS SRL · מזחלות הרים · 20.9',displayOriginal:'RON 78.18',createdAt:'2026-09-20T14:23:00+03:00'}
 ];
 function get(){try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
 function save(v){try{localStorage.setItem(KEY,JSON.stringify(v));return true}catch(e){return false}}
