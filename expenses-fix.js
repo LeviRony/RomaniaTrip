@@ -1,5 +1,6 @@
 (()=>{
-const KEY='romania-manual-expenses';
+const KEY='romania-manual-expenses-v2';
+const OLD_KEY='romania-manual-expenses';
 const FIXED=[
  {key:'intl-license',amount:23,currency:'ILS',description:'רישיון נהיגה בין לאומי',displayOriginal:'₪23',createdAt:'2026-09-12T07:41:00Z'},
  {key:'esim-3',amount:61,currency:'ILS',description:'eSIM 3',displayOriginal:'$20.2',createdAt:'2026-09-12T07:41:00Z'},
@@ -9,8 +10,8 @@ const FIXED=[
  {key:'royal-tickets-20260920',amount:78.18,currency:'RON',description:'ROYAL TICKETS SRL · מזחלות הרים · 20.9',displayOriginal:'RON 78.18',createdAt:'2026-09-20T14:23:00+03:00'},
  {key:'steimatzky-20260918',amount:120.25,currency:'ILS',description:'Steimatzky · הוצאה לטיול · 18.9',displayOriginal:'₪120.25',createdAt:'2026-09-18T12:00:00+03:00'}
 ];
-function get(){try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
-function save(v){try{localStorage.setItem(KEY,JSON.stringify(v));return true}catch(e){return false}}
+function get(){try{let raw=localStorage.getItem(KEY);if(!raw){raw=localStorage.getItem(OLD_KEY);if(raw)localStorage.setItem(KEY,raw)}const v=JSON.parse(raw||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+function save(v){try{const raw=JSON.stringify(v);localStorage.setItem(KEY,raw);localStorage.setItem(OLD_KEY,raw);window.RomaniaFamilySync?.sync?.();return true}catch(e){return false}}
 function seedFixed(){
  let a=get();
  const orderNos=new Set(FIXED.map(x=>x.orderNumber).filter(Boolean));
@@ -64,7 +65,7 @@ function install(){
  if(btn&&!btn.dataset.expenseFix){btn.dataset.expenseFix='1';btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();add()},true)}
  render();patchSummary();
  document.querySelector('[data-page="summary"]')?.addEventListener('click',()=>setTimeout(()=>{render();patchSummary()},30));
- window.addEventListener('storage',e=>{if(e.key===KEY){render();try{if(typeof renderSummary==='function')renderSummary()}catch(_){}}});
+ window.addEventListener('storage',e=>{if(e.key===KEY||e.key===OLD_KEY){render();try{window.RomaniaSummary?.render?.()}catch(_){}}});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 window.renderManualExpenses=render;
