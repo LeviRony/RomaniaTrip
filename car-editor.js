@@ -2,11 +2,11 @@
 const KEY='romania-rental-car-details';
 const defaults={model:'CUPRA Terramar',engine:'1.5 eTSI Petrol Mild Hybrid (MHEV)',fuel:'hybrid'};
 const BOOKING={number:'OTP-2468182759765',pickup:'19.9.2026 · 04:00',dropoff:'30.9.2026 · 08:30',location:'OTP-AIR',flight:'LY9491',arrival:'OTP',cover:'Klass Total Cover'};
-function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
+function load(){try{const saved=JSON.parse(localStorage.getItem(KEY)||'{}');const old=String(saved.model||'').toLowerCase();if(!saved.model||old.includes('volkswagen')||old.includes('tiguan')||old.includes('skoda')){const v={...defaults};localStorage.setItem(KEY,JSON.stringify(v));return v}return {...defaults,...saved}}catch(e){return {...defaults}}}
 function save(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
 function esc(s){return String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]))}
 function fuelLabel(v){return ({petrol:'בנזין',diesel:'דיזל',hybrid:'היברידי',phev:'פלאג־אין היברידי'})[v]||v}
-function syncFuel(v){const fuel=document.getElementById('fuelType');if(!fuel)return;fuel.value=v==='diesel'?'diesel':'petrol';fuel.dispatchEvent(new Event('change',{bubbles:true}));}
+function syncFuel(v){const fuel=document.getElementById('fuelType');if(!fuel)return;if(v==='diesel')fuel.value='diesel';else fuel.value='petrol';fuel.dispatchEvent(new Event('change',{bubbles:true}));}
 function updateBookingDisplay(){
  const page=document.getElementById('page-car');if(!page)return;
  const cards=[...page.querySelectorAll('.grid .card')];
