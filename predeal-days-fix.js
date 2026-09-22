@@ -25,7 +25,7 @@ function apply(){
   injectResponsiveFixes();
   if(typeof D==='undefined'||!Array.isArray(D)||D.length<4)return;
   D[1]={n:'ראשון · Predeal → Sinaia',note:'מזחלות ההרים ב-Predeal בוצעו. ממשיכים לארמון פלש ולאחר מכן זמן חופשי להסתובב בסינאיה.',s:[['Hotel Orizont Predeal',45.503,25.578,'09:00','ארוחת בוקר ויציאה'],['Mountain Coaster Predeal',45.500,25.570,'בוצע ✅','מזחלות הרים · בוצע · עלינו לגובה 1,451 מטר'],['Hotel Orizont Predeal',45.503,25.578,'אחרי המזחלות','חזרה למלון · בוצע ✅'],['Peleș Castle',45.3599,25.5426,'אחר כך','יציאה מהמלון לארמון פלש'],['Sinaia',45.351,25.551,'אחר כך','הסתובבות חופשית בסינאיה · מרכז / פארק / קפה'],['Hotel Orizont Predeal',45.503,25.578,'ערב','חזרה למלון'],['צעדים ביום',0,0,'13,105 צעדים','10.09 ק״מ · 479 קלוריות · 8 קומות · Samsung Health']]};
-  D[2]={n:'שני · פרדיאל · יום כיפור',note:'יום כיפור — יום רגוע. רכיבה קצרה היא אפשרות לבחירה בלבד.',s:[['Hotel Orizont Predeal',45.503,25.578,'','מנוחה במלון'],['Predeal',45.504,25.579,'','🚲 אופציה: סיבוב אופניים קצר במרכז Predeal וחזרה'],['Hotel Orizont Predeal',45.503,25.578,'','חזרה למלון']]};
+  D[2]={n:'שני · Brașov ו-Poiana Brașov',note:'המסלול שבוצע בפועל ב-21.9.',s:[['Hotel Orizont Predeal',45.503,25.578,'יציאה','יציאה מהמלון'],['AFI Brașov',45.642,25.600,'אחר כך','קניון AFI Brașov · בוצע ✅'],['Fun Park Poiana Brașov',45.590,25.554,'אחר כך','Fun Park Poiana Brașov · בוצע ✅'],['Starbucks Piața Sfatului, Brașov',45.642,25.589,'אחר כך','Starbucks במרכז Brașov · בוצע ✅'],['Hotel Orizont Predeal',45.503,25.578,'ערב','חזרה למלון · בוצע ✅']]};
   D[3]={n:'שלישי · פרדיאל',note:'',s:[['Hotel Orizont Predeal',45.503,25.578,'','מלון']]};
   try{localStorage.removeItem('romania-itinerary-v3')}catch(e){}
   try{window.renderHome?.()}catch(e){}
