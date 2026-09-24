@@ -1,7 +1,7 @@
 (()=>{
 const KEY='romania-rental-car-details';
-const defaults={model:'CUPRA Terramar',engine:'1.5 eTSI Petrol Mild Hybrid (MHEV)',fuel:'hybrid'};
-const BOOKING={number:'OTP-2468182759765',pickup:'19.9.2026 · 04:00',dropoff:'30.9.2026 · 08:30',location:'OTP-AIR',flight:'LY9491',arrival:'OTP',cover:'Klass Total Cover'};
+const defaults={model:'CUPRA Terramar',engine:'1.5 eTSI Petrol Mild Hybrid (MHEV)',fuel:'hybrid',plate:'B-311-KWN'};
+const BOOKING={number:'OTP-2468182759765',plate:'B-311-KWN',pickup:'19.9.2026 · 04:00',dropoff:'30.9.2026 · 08:30',location:'OTP-AIR',flight:'LY9491',arrival:'OTP',cover:'Klass Total Cover'};
 function load(){try{const saved=JSON.parse(localStorage.getItem(KEY)||'{}');const old=String(saved.model||'').toLowerCase();if(!saved.model||old.includes('volkswagen')||old.includes('tiguan')||old.includes('skoda')){const v={...defaults};localStorage.setItem(KEY,JSON.stringify(v));return v}return {...defaults,...saved}}catch(e){return {...defaults}}}
 function save(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
 function esc(s){return String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]))}
