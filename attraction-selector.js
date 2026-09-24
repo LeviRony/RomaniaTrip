@@ -12,18 +12,18 @@ style.textContent=`
 `;
 document.head.appendChild(style);
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function fixed(s){const name=String(s?.[0]||''),desc=String(s?.[4]||'');return /(hotel|swissôtel|swissotel|novotel|orizont|otp|tlv|airport|klass|מלון|צ׳ק|צ'ק|חזרה למלון|יציאה|טרמינל|החזרת הרכב)/i.test((name+' '+desc).toLowerCase())}
+function tripDayIndex(){const now=new Date(),local=new Date(now.toLocaleString('en-US',{timeZone:'Europe/Bucharest'}));if(local.getFullYear()===2026&&local.getMonth()===8&&local.getDate()>=19&&local.getDate()<=30)return local.getDate()-19;return local>new Date('2026-09-30T23:59:59+03:00')?11:-1}\nfunction fixed(s,dayIndex){const name=String(s?.[0]||''),desc=String(s?.[4]||'');const completed=Number.isInteger(dayIndex)&&dayIndex<tripDayIndex();return completed||/(hotel|swissôtel|swissotel|novotel|orizont|otp|tlv|airport|klass|מלון|צ׳ק|צ'ק|חזרה למלון|יציאה|טרמינל|החזרת הרכב|בוצע)/i.test((name+' '+desc).toLowerCase())}
 function skey(s){return [s?.[0],s?.[1],s?.[2]].join('|')}
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){return {}}}
 function save(v){localStorage.setItem(KEY,JSON.stringify(v));try{window.RomaniaFamilySync?.sync?.()}catch(e){}}
-function selected(i,s){if(fixed(s))return true;const all=load(),day=all[String(i)]||{};return day[skey(s)]!==false}
+function selected(i,s){if(fixed(s,i))return true;const all=load(),day=all[String(i)]||{};return day[skey(s)]!==false}
 function selectedStops(i){const d=BASE[i];return d?d.s.filter(s=>selected(i,s)):[]}
 function renderPicker(i){
  currentDay=i;
  const root=document.getElementById('stops');if(!root||!BASE[i])return;
  let box=document.getElementById('attractionPicker');
  if(!box){box=document.createElement('div');box.id='attractionPicker';box.className='attraction-picker';root.parentNode.insertBefore(box,root)}
- const opts=BASE[i].s.filter(s=>!fixed(s));
+ const opts=BASE[i].s.filter(s=>!fixed(s,i));
  if(!opts.length){box.innerHTML='<h3>🎯 בחירת אטרקציות</h3><div class="picker-sub">ביום הזה אין כרגע אטרקציות לבחירה — רק נקודות קבועות כמו מלון, טיסה או איסוף רכב.</div>';return}
  const on=opts.filter(s=>selected(i,s)).length;
  box.innerHTML=`<h3>🎯 בחר אטרקציות ליום הזה</h3><div class="picker-sub">אפשר להדליק או לכבות אטרקציות לפי מזג האוויר. המסלול והמפה יתעדכנו מיד. <span class="selected-count">נבחרו ${on} מתוך ${opts.length}</span></div><div class="attraction-options">${opts.map(s=>{const checked=selected(i,s);return `<label class="attraction-option ${checked?'':'off'}"><input type="checkbox" data-attraction="${esc(skey(s))}" ${checked?'checked':''}><span><b>${esc(s[0])}</b><small>${esc(s[3]||'')} ${s[4]?'· '+esc(s[4]):''}</small></span></label>`}).join('')}</div><div class="picker-actions"><button type="button" data-picker-all="1">בחר הכל</button><button type="button" data-picker-none="1">נקה אטרקציות</button></div>`;
@@ -31,7 +31,7 @@ function renderPicker(i){
  box.querySelector('[data-picker-all]')?.addEventListener('click',()=>setAll(i,true));
  box.querySelector('[data-picker-none]')?.addEventListener('click',()=>setAll(i,false));
 }
-function setAll(i,value){const all=load(),day=all[String(i)]||{};BASE[i].s.filter(s=>!fixed(s)).forEach(s=>day[skey(s)]=value);all[String(i)]=day;save(all);refresh(i)}
+function setAll(i,value){const all=load(),day=all[String(i)]||{};BASE[i].s.filter(s=>!fixed(s,i)).forEach(s=>day[skey(s)]=value);all[String(i)]=day;save(all);refresh(i)}
 function refresh(i){if(typeof window.show==='function')window.show(i);else renderPicker(i)}
 function patch(){
  if(typeof D==='undefined'||!Array.isArray(D)||!D.length||typeof window.show!=='function')return false;
