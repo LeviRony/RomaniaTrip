@@ -19,7 +19,7 @@ function nextStop(x){if(x.y===2026&&x.m===9&&x.d<=18)return{time:'18.9 בערב'
 function countdownText(){const total=Math.max(0,Math.floor((START-new Date())/1000)),days=Math.floor(total/86400),hours=Math.floor((total%86400)/3600),minutes=Math.floor((total%3600)/60),seconds=total%60;return `${days} ימים · ${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`}
 function tripState(x){const now=new Date();if(now<START){return{eyebrow:'הטיול מתקרב',title:countdownText(),sub:'ספירה לאחור עד ההמראה · LY9491 · 19.9 00:20',pct:0}}if(now>END)return{eyebrow:'הטיול הסתיים',title:'חזרנו הביתה',sub:'30.9.2026',pct:100};const pct=Math.max(0,Math.min(100,Math.round((now-START)/(END-START)*100)));return{eyebrow:'אנחנו ברומניה',title:`יום ${Math.max(1,x.d-18)} מתוך 12`,sub:`${x.d}.9.2026`,pct}}
 function tripTotals(x){
- const actual={19:{steps:7019,walk:5.33},20:{steps:13105,walk:10.09},21:{steps:8671,walk:6.68},22:{steps:5810,walk:4.68},23:{steps:12716,walk:9.78}};
+ const actual={19:{steps:7019,walk:5.33},20:{steps:13105,walk:10.09},21:{steps:8671,walk:6.68},22:{steps:5810,walk:4.68},23:{steps:12716,walk:9.78},25:{steps:6666,walk:5.13}};
  let steps=0,walk=0;Object.entries(actual).forEach(([d,v])=>{if(+d<=x.d){steps+=v.steps;walk+=v.walk}});
  const firstCar=651,startOdo=12852;let km=firstCar;
  try{const finalOdo=Number(localStorage.getItem('romania-current-car-odometer')||localStorage.getItem('car-current-odometer')||0);if(finalOdo>=startOdo)km+=finalOdo-startOdo}catch(e){}
