@@ -9,15 +9,27 @@
 <section id="page-summary" class="page">
   <h1>💰 סיכום עלויות הטיול</h1>
   <div class="card">
-    <div class="summary-list">
+    <div class="summary-list" id="summaryList">
       <div class="summary-row"><div><b>✈️ טיסות</b><div class="muted">EL AL / TAROM · הלוך וחזור</div></div><div class="ltr">₪7,035</div><div class="summary-ils">₪7,035</div></div>
       <div class="summary-row"><div><b>🏨 Monopoly Hotel · Otopeni</b><div class="muted">18–19.9 · לילה 1</div></div><div class="ltr">546.75 RON</div><div class="summary-ils">≈ ₪421</div></div>
       <div class="summary-row"><div><b>🏨 Hotel Orizont Predeal</b><div class="muted">19–23.9 · 4 לילות</div></div><div class="ltr">₪2,255</div><div class="summary-ils">₪2,255</div></div>
       <div class="summary-row"><div><b>🏨 Swissôtel Poiana Brașov</b><div class="muted">23–27.9 · 4 לילות</div></div><div class="ltr">€1,268.70</div><div class="summary-ils">≈ ₪4,948</div></div>
       <div class="summary-row"><div><b>🏨 Novotel Bucharest City Centre</b><div class="muted">27–30.9 · 3 לילות</div></div><div class="ltr">₪2,968</div><div class="summary-ils">₪2,968</div></div>
       <div class="summary-row"><div><b>🚙 Klass Wagen</b><div class="muted">Volkswagen Tiguan Automatic · Total Cover</div></div><div class="ltr">€527</div><div class="summary-ils">≈ ₪2,055</div></div>
-      <div class="summary-row total"><div><b>סה״כ הזמנות בסיס</b><div class="muted">לפני דלק והוצאות נוספות · המרות EUR/RON משוערות</div></div><div></div><div class="summary-ils">≈ ₪19,682</div></div>
+      <div id="manualSummaryRows"></div>
+      <div class="summary-row total"><div><b>סה״כ הזמנות + הוצאות</b><div class="muted">המרות EUR/RON משוערות</div></div><div></div><div class="summary-ils" id="summaryGrandTotal">≈ ₪19,682</div></div>
     </div>
+  </div>
+  <h2 class="section-title">➕ הוצאות נוספות</h2>
+  <div class="card">
+    <div class="expense-form">
+      <label class="field"><span>מחיר</span><input id="expenseAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="100"></label>
+      <label class="field"><span>מטבע</span><select id="expenseCurrency"><option value="RON">RON</option><option value="EUR">EUR</option><option value="ILS">ILS</option><option value="USD">USD</option></select></label>
+      <label class="field"><span>הסבר</span><input id="expenseDescription" type="text" placeholder="למשל: מסעדה / קניות / אטרקציה"></label>
+      <button class="btn" type="button" id="addExpenseBtn">הוסף הוצאה</button>
+    </div>
+    <div class="expense-table" id="expenseTable"></div>
+    <p class="muted">ההוצאות נשמרות במכשיר הזה ונוספות לסיכום.</p>
   </div>
 </section>
 </main><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
