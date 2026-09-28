@@ -9,7 +9,7 @@ const hotels=[
 function localParts(){const p=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const g=t=>Number(p.find(x=>x.type===t)?.value||0);return{y:g('year'),m:g('month'),d:g('day'),h:g('hour'),min:g('minute')}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function mapUrl(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)}
-function topNav(page){const b=document.querySelector(`header .nav button[data-page="${page}"]`);if(b)b.click()}
+function topNav(page){const mapped=page==='summary'?'tripSummary':page;const b=document.querySelector(`header .nav button[data-page="${mapped}"]`)||document.querySelector(`header .nav button[data-page="${page}"]`);if(b){b.click();return}document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));const target=document.getElementById('page-'+mapped)||document.getElementById('page-'+page);if(target){target.classList.add('on');if(mapped==='tripSummary'||page==='summary')window.RomaniaSummary?.render?.();window.scrollTo({top:0,behavior:'smooth'})}}
 function injectStyle(){if(document.getElementById('appShellStyle'))return;const s=document.createElement('style');s.id='appShellStyle';s.textContent=`
 :root{--app-blue:#2563eb;--app-blue-dark:#1d4ed8;--app-blue-soft:#eff6ff}
 #homeToday{position:relative;gap:0!important;padding-right:4px}
